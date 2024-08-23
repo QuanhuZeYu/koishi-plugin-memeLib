@@ -1,7 +1,8 @@
 {
   "name": "@zeyu/koishi-plugin-memelib",
   "version": "0.1.0",
-  "main": "src/index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
     "src",
     "dist"
