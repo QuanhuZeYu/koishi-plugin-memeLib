@@ -1,16 +1,26 @@
 {
-  "name": "memelib",
-  "version": "1.0.0",
-  "main": "index.js",
+  "name": "@zeyu/koishi-plugin-memelib",
+  "version": "0.1.0",
+  "main": "src/index.js",
+  "files": [
+    "src",
+    "dist"
+  ],
+  "license": "MIT",
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
     "test": "ts-node -r tsconfig-paths/register src/test.ts"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "chatbot",
+    "koishi",
+    "plugin",
+    "meme",
+    "lib"
+  ],
+  "author": "泉户泽雨",
   "description": "",
   "devDependencies": {
     "@types/fluent-ffmpeg": "^2.1.25",
@@ -23,7 +33,6 @@
   "dependencies": {
     "canvas": "^2.11.2",
     "fluent-ffmpeg": "^2.1.3",
-    "gifencoder": "^2.0.1",
     "sharp": "^0.33.5"
   }
 }
