@@ -1,6 +1,4 @@
 import path from "path";
-import sharp from "sharp";
-import fs from 'fs/promises'
 import { promisify } from "util";
 import { exec } from "child_process";
 
@@ -8,7 +6,7 @@ import { tools } from "@src/tools";
 const CTC = tools.CropToCircle
 const saveGifToFile = tools.saveGifToFile
 import { Petpet } from "@src/memeGenerator/petpet";
-import { buffer } from "stream/consumers";
+
 
 const BASE_DIR = __dirname
 
