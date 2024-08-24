@@ -12,8 +12,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install FFmpeg
-        run: |
+      - run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg
           ffmpeg -version # 验证 FFmpeg 安装
