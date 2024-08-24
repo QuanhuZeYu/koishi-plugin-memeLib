@@ -1,4 +1,4 @@
-name: Node.js Package
+name: My Package
 
 on:
   release:
@@ -29,8 +29,7 @@ jobs:
         with:
           node-version: 20
           registry-url: https://npm.pkg.github.com/
-      - name: Install FFmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - run: npm ci
       - run: npm publish
         env:
