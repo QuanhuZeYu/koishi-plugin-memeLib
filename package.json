@@ -1,8 +1,7 @@
 {
-  "name": "@QuanhuZeYu/koishi-plugin-memelib",
+  "name": "@quanhuzeyu/koishi-plugin-memelib",
   "version": "0.1.1",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "private": false,
   "files": [
     "src",
