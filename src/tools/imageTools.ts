@@ -61,7 +61,7 @@ async function cropToCircle(imageBuffer:Buffer): Promise<Buffer|undefined>  {
             input: circleShape,
             blend: 'dest-in'
         }]).png().toBuffer();
-        console.log("圆形裁剪完成");
+        // console.log("圆形裁剪完成");
         return outBuf
     } catch (error) {
       console.error("裁剪过程中发生错误:", error);
