@@ -1,7 +1,5 @@
-import sharp from "sharp";
 import fs from 'fs'
 import path from "path";
-import Ffmpeg from "fluent-ffmpeg";
 
 export interface FrameData {
     x:number

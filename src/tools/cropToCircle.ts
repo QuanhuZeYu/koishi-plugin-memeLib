@@ -1,4 +1,4 @@
-import sharp from "sharp";
+import sharp from 'node_modules/sharp/lib/index';
 import fs from 'fs/promises'
 
 /**

@@ -1,4 +1,4 @@
-import { saveGifToFile } from '@src/tools/gifTools';
+import { saveGifToFile } from '../tools/gifTools';
 export declare const tools: {
     CropToCircle: {
         cropToCircle: (imageBuffer: Buffer) => Promise<Buffer | undefined>;
