@@ -1,6 +1,6 @@
-import path from "path"
+import path from "node:path"
 
-import {FrameData} from "@src/tools/gifTools"
+import {FrameData} from "../../tools/gifTools"
 import sharp from "node_modules/sharp/lib/index"
 import Ffmpeg from "fluent-ffmpeg"
 import { PassThrough, Readable } from "stream"

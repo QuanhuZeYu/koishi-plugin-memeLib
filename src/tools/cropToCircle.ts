@@ -1,5 +1,5 @@
 import sharp from 'node_modules/sharp/lib/index';
-import fs from 'fs/promises'
+import fs from 'node:fs/promises'
 
 /**
  * 
