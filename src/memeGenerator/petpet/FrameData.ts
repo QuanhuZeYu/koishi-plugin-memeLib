@@ -1,7 +1,7 @@
 import path from "node:path"
 
 import {FrameData} from "../../tools/gifTools"
-import sharp from "node_modules/sharp/lib/index"
+import sharp from "sharp"
 import Ffmpeg from "fluent-ffmpeg"
 import { PassThrough, Readable } from "stream"
 

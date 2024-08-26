@@ -3,9 +3,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CropToCircle = void 0;
+exports.imageTools = void 0;
 const sharp_1 = __importDefault(require("sharp"));
-const promises_1 = __importDefault(require("fs/promises"));
+const promises_1 = __importDefault(require("node:fs/promises"));
 /**
  *
  * @param absPath
@@ -59,11 +59,11 @@ async function cropToCircle(imageBuffer) {
                 input: circleShape,
                 blend: 'dest-in'
             }]).png().toBuffer();
-        console.log("圆形裁剪完成");
+        // console.log("圆形裁剪完成");
         return outBuf;
     }
     catch (error) {
         console.error("裁剪过程中发生错误:", error);
     }
 }
-exports.CropToCircle = { cropToCircle, loadImageFPath, saveImageFBuffer };
+exports.imageTools = { cropToCircle, loadImageFPath, saveImageFBuffer };

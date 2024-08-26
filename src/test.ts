@@ -3,7 +3,7 @@ import { promisify } from "node:util";
 import { exec } from "node:child_process";
 
 import { tools } from "./tools/index";
-const CTC = tools.CropToCircle
+const CTC = tools.imageTools
 const saveGifToFile = tools.saveGifToFile
 import { Petpet } from "./memeGenerator/petpet/index";
 

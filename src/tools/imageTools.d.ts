@@ -11,7 +11,7 @@ declare function saveImageFBuffer(imgBuf: Buffer, fileName: string): Promise<voi
  * @returns
  */
 declare function cropToCircle(imageBuffer: Buffer): Promise<Buffer | undefined>;
-export declare const CropToCircle: {
+export declare const imageTools: {
     cropToCircle: typeof cropToCircle;
     loadImageFPath: typeof loadImageFPath;
     saveImageFBuffer: typeof saveImageFBuffer;

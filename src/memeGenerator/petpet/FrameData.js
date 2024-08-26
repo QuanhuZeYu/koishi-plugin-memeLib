@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.genPetpetGif = genPetpetGif;
-const path_1 = __importDefault(require("path"));
+const node_path_1 = __importDefault(require("node:path"));
 const sharp_1 = __importDefault(require("sharp"));
 const fluent_ffmpeg_1 = __importDefault(require("fluent-ffmpeg"));
 const stream_1 = require("stream");
@@ -38,7 +38,7 @@ async function genPetpetGif(inputImg) {
         // 读取手部图像
         const hands = await Promise.all(frames.map(async (_, index) => {
             try {
-                return await (0, sharp_1.default)(path_1.default.join(__dirname, `images/${index}.png`)).toBuffer();
+                return await (0, sharp_1.default)(node_path_1.default.join(__dirname, `images/${index}.png`)).toBuffer();
             }
             catch (err) {
                 console.error(`读取图像时发生错误: ${err}`);

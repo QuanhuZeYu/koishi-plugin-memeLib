@@ -1,4 +1,4 @@
-import sharp from 'node_modules/sharp/lib/index';
+import sharp from 'sharp';
 import fs from 'node:fs/promises'
 
 /**
@@ -69,4 +69,4 @@ async function cropToCircle(imageBuffer:Buffer): Promise<Buffer|undefined>  {
   }
 
 
-  export const CropToCircle = {cropToCircle, loadImageFPath, saveImageFBuffer}
+  export const imageTools = {cropToCircle, loadImageFPath, saveImageFBuffer}
