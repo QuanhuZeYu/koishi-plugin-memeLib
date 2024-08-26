@@ -1,11 +1,11 @@
-import path from "path";
-import { promisify } from "util";
-import { exec } from "child_process";
+import path from "node:path";
+import { promisify } from "node:util";
+import { exec } from "node:child_process";
 
-import { tools } from "@src/tools";
+import { tools } from "./tools/index";
 const CTC = tools.CropToCircle
 const saveGifToFile = tools.saveGifToFile
-import { Petpet } from "@src/memeGenerator/petpet";
+import { Petpet } from "./memeGenerator/petpet/index";
 
 
 const BASE_DIR = __dirname

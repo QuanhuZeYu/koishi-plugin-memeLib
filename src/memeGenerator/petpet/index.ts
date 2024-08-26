@@ -1,3 +1,3 @@
-import {genPetpetGif} from '@src/memeGenerator/petpet/FrameData'
+import {genPetpetGif} from '../petpet/FrameData'
 
 export const Petpet = {genPetpetGif}

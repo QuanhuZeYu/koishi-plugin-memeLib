@@ -1,10 +1,9 @@
-import path, { resolve } from "path"
+import path from "node:path"
 
-import {FrameData} from "@src/tools/gifTools"
-import sharp from "sharp"
+import {FrameData} from "../../tools/gifTools"
+import sharp from "node_modules/sharp/lib/index"
 import Ffmpeg from "fluent-ffmpeg"
-import { PassThrough, Readable, Stream } from "stream"
-import { rejects } from "assert"
+import { PassThrough, Readable } from "stream"
 
 // 逐帧合成 - 单步函数
 async function createFrame(inputImg:Buffer, handImg:Buffer, frame:FrameData):Promise<Buffer> {
