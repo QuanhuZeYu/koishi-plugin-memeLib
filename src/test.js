@@ -8,7 +8,6 @@ const node_util_1 = require("node:util");
 const node_child_process_1 = require("node:child_process");
 const index_1 = require("./tools/index");
 const CTC = index_1.tools.imageTools;
-const saveGifToFile = index_1.tools.saveGifToFile;
 const BASE_DIR = __dirname;
 const execAsync = (0, node_util_1.promisify)(node_child_process_1.exec);
 // 测试生成meme
@@ -30,18 +29,25 @@ const execAsync = (0, node_util_1.promisify)(node_child_process_1.exec);
 //     }
 //   }
 // }
+// 测试判断 buf 图片类型
+// async function test() {
+//   const gifPath = path.join(__dirname, 'out/output.gif')
+//   const gifBuf = await tools.imageTools.loadImageFPath(gifPath)
+//   let bo = tools.imageTools.isGif(gifBuf)
+//   console.log(bo)
+//   bo = tools.imageTools.isPng(gifBuf)
+//   console.log(bo)
+//   const jpgPath = path.join(__dirname, 'test.jpg')
+//   const jpgBuf = await tools.imageTools.loadImageFPath(jpgPath)
+//   let bo2 = tools.imageTools.isJpg(jpgBuf)
+//   console.log(bo2)
+//   bo2 = tools.imageTools.isGif(jpgBuf)
+//   console.log(bo2)
+// }
+// 测试提取Gif帧
 async function test() {
     const gifPath = node_path_1.default.join(__dirname, 'out/output.gif');
     const gifBuf = await index_1.tools.imageTools.loadImageFPath(gifPath);
-    let bo = index_1.tools.imageTools.isGif(gifBuf);
-    console.log(bo);
-    bo = index_1.tools.imageTools.isPng(gifBuf);
-    console.log(bo);
-    const jpgPath = node_path_1.default.join(__dirname, 'test.jpg');
-    const jpgBuf = await index_1.tools.imageTools.loadImageFPath(jpgPath);
-    let bo2 = index_1.tools.imageTools.isJpg(jpgBuf);
-    console.log(bo2);
-    bo2 = index_1.tools.imageTools.isGif(jpgBuf);
-    console.log(bo2);
+    index_1.tools.gifTools.extractGifFramesFromBuffer(gifBuf, node_path_1.default.join(__dirname, 'out/gif'));
 }
 test();

@@ -4,11 +4,7 @@ import { exec } from "node:child_process";
 
 import { tools } from "./tools/index";
 const CTC = tools.imageTools
-const saveGifToFile = tools.saveGifToFile
 import { Petpet } from "./memeGenerator/petpet/index";
-
-
-const BASE_DIR = __dirname
 
 const execAsync = promisify(exec);
 
@@ -32,20 +28,30 @@ const execAsync = promisify(exec);
 //   }
 // }
 
-async function test() {
-  const gifPath = path.join(__dirname, 'out/output.gif')
-  const gifBuf = await tools.imageTools.loadImageFPath(gifPath)
-  let bo = tools.imageTools.isGif(gifBuf)
-  console.log(bo)
-  bo = tools.imageTools.isPng(gifBuf)
-  console.log(bo)
 
-  const jpgPath = path.join(__dirname, 'test.jpg')
-  const jpgBuf = await tools.imageTools.loadImageFPath(jpgPath)
-  let bo2 = tools.imageTools.isJpg(jpgBuf)
-  console.log(bo2)
-  bo2 = tools.imageTools.isGif(jpgBuf)
-  console.log(bo2)
+// 测试判断 buf 图片类型
+// async function test() {
+//   const gifPath = path.join(__dirname, 'out/output.gif')
+//   const gifBuf = await tools.imageTools.loadImageFPath(gifPath)
+//   let bo = tools.imageTools.isGif(gifBuf)
+//   console.log(bo)
+//   bo = tools.imageTools.isPng(gifBuf)
+//   console.log(bo)
+
+//   const jpgPath = path.join(__dirname, 'test.jpg')
+//   const jpgBuf = await tools.imageTools.loadImageFPath(jpgPath)
+//   let bo2 = tools.imageTools.isJpg(jpgBuf)
+//   console.log(bo2)
+//   bo2 = tools.imageTools.isGif(jpgBuf)
+//   console.log(bo2)
+// }
+
+
+// 测试提取Gif帧
+async function test() {
+  const gifPath = path.join(__dirname, 'long.gif')
+  const gifBuf = await tools.imageTools.loadImageFPath(gifPath)
+  tools.gifTools.extractGifFramesFromBuffer(gifBuf,path.join(__dirname, 'out/gif'))
 }
 
 test()

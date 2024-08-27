@@ -9,6 +9,9 @@ export declare const MemeGenerator: {
             isGif: (buffer: Buffer) => boolean;
             isJpg: (buffer: Buffer) => boolean;
         };
-        saveGifToFile: typeof import("./tools/gifTools").saveGifToFile;
+        gifTools: {
+            saveGifToFile: (gifBuffer: Buffer, outputPath: string) => Promise<void>;
+            extractGifFramesFromBuffer: (gifBuffer: Buffer, outputDir: string) => Promise<void>;
+        };
     };
 };

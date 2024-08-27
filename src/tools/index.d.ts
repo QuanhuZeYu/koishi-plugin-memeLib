@@ -1,4 +1,3 @@
-import { saveGifToFile } from '../tools/gifTools';
 export declare const tools: {
     imageTools: {
         cropToCircle: (imageBuffer: Buffer) => Promise<Buffer | undefined>;
@@ -8,5 +7,8 @@ export declare const tools: {
         isGif: (buffer: Buffer) => boolean;
         isJpg: (buffer: Buffer) => boolean;
     };
-    saveGifToFile: typeof saveGifToFile;
+    gifTools: {
+        saveGifToFile: (gifBuffer: Buffer, outputPath: string) => Promise<void>;
+        extractGifFramesFromBuffer: (gifBuffer: Buffer, outputDir: string) => Promise<void>;
+    };
 };
