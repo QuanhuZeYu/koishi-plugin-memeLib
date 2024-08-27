@@ -3,7 +3,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.imageTools = void 0;
 const sharp_1 = __importDefault(require("sharp"));
 const promises_1 = __importDefault(require("node:fs/promises"));
 /**
@@ -66,4 +65,22 @@ async function cropToCircle(imageBuffer) {
         console.error("裁剪过程中发生错误:", error);
     }
 }
-exports.imageTools = { cropToCircle, loadImageFPath, saveImageFBuffer };
+/** 判断是否是png */
+function isPng(buffer) {
+    const pngSignature = Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+    return buffer.slice(0, 8).equals(pngSignature);
+}
+/** 判断是否是gif */
+function isGif(buffer) {
+    const gif87aSignature = Buffer.from([0x47, 0x49, 0x46, 0x38, 0x37, 0x61]);
+    const gif89aSignature = Buffer.from([0x47, 0x49, 0x46, 0x38, 0x39, 0x61]);
+    const header = buffer.slice(0, 6);
+    return header.equals(gif87aSignature) || header.equals(gif89aSignature);
+}
+/** 判断是否是jpg */
+function isJpg(buffer) {
+    const jpgSignature = Buffer.from([0xFF, 0xD8, 0xFF]);
+    return buffer.slice(0, 3).equals(jpgSignature);
+}
+const imageTools = { cropToCircle, loadImageFPath, saveImageFBuffer, isPng, isGif, isJpg };
+exports.default = imageTools;

@@ -66,7 +66,29 @@ async function cropToCircle(imageBuffer:Buffer): Promise<Buffer|undefined>  {
     } catch (error) {
       console.error("裁剪过程中发生错误:", error);
     }
-  }
+}
+
+/** 判断是否是png */ 
+function isPng(buffer: Buffer): boolean {
+    const pngSignature = Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+    return buffer.slice(0, 8).equals(pngSignature);
+}
+
+/** 判断是否是gif */
+function isGif(buffer: Buffer): boolean {
+    const gif87aSignature = Buffer.from([0x47, 0x49, 0x46, 0x38, 0x37, 0x61]);
+    const gif89aSignature = Buffer.from([0x47, 0x49, 0x46, 0x38, 0x39, 0x61]);
+    const header = buffer.slice(0, 6);
+    return header.equals(gif87aSignature) || header.equals(gif89aSignature);
+}
+
+/** 判断是否是jpg */
+function isJpg(buffer: Buffer): boolean {
+    const jpgSignature = Buffer.from([0xFF, 0xD8, 0xFF]);
+    return buffer.slice(0, 3).equals(jpgSignature);
+}
 
 
-  export const imageTools = {cropToCircle, loadImageFPath, saveImageFBuffer}
+const imageTools = {cropToCircle, loadImageFPath, saveImageFBuffer, isPng, isGif, isJpg}
+
+export default imageTools

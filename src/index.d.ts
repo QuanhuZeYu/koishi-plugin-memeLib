@@ -5,6 +5,9 @@ export declare const MemeGenerator: {
             cropToCircle: (imageBuffer: Buffer) => Promise<Buffer | undefined>;
             loadImageFPath: (absPath: string) => Promise<Buffer>;
             saveImageFBuffer: (imgBuf: Buffer, fileName: string) => Promise<void>;
+            isPng: (buffer: Buffer) => boolean;
+            isGif: (buffer: Buffer) => boolean;
+            isJpg: (buffer: Buffer) => boolean;
         };
         saveGifToFile: typeof import("./tools/gifTools").saveGifToFile;
     };

@@ -11,9 +11,18 @@ declare function saveImageFBuffer(imgBuf: Buffer, fileName: string): Promise<voi
  * @returns
  */
 declare function cropToCircle(imageBuffer: Buffer): Promise<Buffer | undefined>;
-export declare const imageTools: {
+/** 判断是否是png */
+declare function isPng(buffer: Buffer): boolean;
+/** 判断是否是gif */
+declare function isGif(buffer: Buffer): boolean;
+/** 判断是否是jpg */
+declare function isJpg(buffer: Buffer): boolean;
+declare const imageTools: {
     cropToCircle: typeof cropToCircle;
     loadImageFPath: typeof loadImageFPath;
     saveImageFBuffer: typeof saveImageFBuffer;
+    isPng: typeof isPng;
+    isGif: typeof isGif;
+    isJpg: typeof isJpg;
 };
-export {};
+export default imageTools;
