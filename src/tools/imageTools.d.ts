@@ -20,11 +20,11 @@ declare function saveImageFBuffer(imgBuf: Buffer, fileName: string): Promise<voi
  * @returns
  */
 declare function cropToCircle(imageBuffer: Buffer): Promise<Buffer | undefined>;
-/** 判断是否是png */
+/** 判断是否是PNG */
 declare function isPng(buffer: Buffer): boolean;
-/** 判断是否是gif */
+/** 判断是否是GIF */
 declare function isGif(buffer: Buffer): boolean;
-/** 判断是否是jpg */
+/** 判断是否是JPG */
 declare function isJpg(buffer: Buffer): boolean;
 declare const imageTools: {
     cropToCircle: typeof cropToCircle;

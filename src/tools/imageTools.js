@@ -83,22 +83,43 @@ async function cropToCircle(imageBuffer) {
         console.error("裁剪过程中发生错误:", error);
     }
 }
-/** 判断是否是png */
+/** 判断是否是PNG */
 function isPng(buffer) {
     const pngSignature = Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
-    return buffer.slice(0, 8).equals(pngSignature);
+    return buffer.length >= 8 && buffer.compare(pngSignature, 0, 8, 0, 8) === 0;
 }
-/** 判断是否是gif */
+/** 判断是否是GIF */
 function isGif(buffer) {
-    const gif87aSignature = Buffer.from([0x47, 0x49, 0x46, 0x38, 0x37, 0x61]);
-    const gif89aSignature = Buffer.from([0x47, 0x49, 0x46, 0x38, 0x39, 0x61]);
-    const header = buffer.slice(0, 6);
-    return header.equals(gif87aSignature) || header.equals(gif89aSignature);
+    const gif87aSignature = [0x47, 0x49, 0x46, 0x38, 0x37, 0x61];
+    const gif89aSignature = [0x47, 0x49, 0x46, 0x38, 0x39, 0x61];
+    if (buffer.length < 6) {
+        return false;
+    }
+    const header = [
+        buffer.readUInt8(0),
+        buffer.readUInt8(1),
+        buffer.readUInt8(2),
+        buffer.readUInt8(3),
+        buffer.readUInt8(4),
+        buffer.readUInt8(5)
+    ];
+    return (arraysEqual(header, gif87aSignature) ||
+        arraysEqual(header, gif89aSignature));
 }
-/** 判断是否是jpg */
+/** 比较两个字节数组是否相等 */
+function arraysEqual(a, b) {
+    if (a.length !== b.length)
+        return false;
+    for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i])
+            return false;
+    }
+    return true;
+}
+/** 判断是否是JPG */
 function isJpg(buffer) {
     const jpgSignature = Buffer.from([0xFF, 0xD8, 0xFF]);
-    return buffer.slice(0, 3).equals(jpgSignature);
+    return buffer.length >= 3 && buffer.compare(jpgSignature, 0, 3, 0, 3) === 0;
 }
 const imageTools = { cropToCircle, loadImageFPath, saveImageFBuffer, isPng, isGif, isJpg };
 exports.default = imageTools;
