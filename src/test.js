@@ -1,11 +1,17 @@
-import path from "node:path";
-import { promisify } from "node:util";
-import { exec } from "node:child_process";
-import tools from "./tools/index";
-const CTC = tools.imageTools;
-import { Petpet } from "./memeGenerator/petpet/index";
-export const MY_PLUGIN_DIR = path.join(__dirname);
-const execAsync = promisify(exec);
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MY_PLUGIN_DIR = void 0;
+const node_path_1 = __importDefault(require("node:path"));
+const node_util_1 = require("node:util");
+const node_child_process_1 = require("node:child_process");
+const index_1 = __importDefault(require("./tools/index"));
+const CTC = index_1.default.imageTools;
+const index_2 = require("./memeGenerator/petpet/index");
+exports.MY_PLUGIN_DIR = node_path_1.default.join(__dirname);
+const execAsync = (0, node_util_1.promisify)(node_child_process_1.exec);
 // 测试生成meme
 // async function test() {
 //   // const input = path.join(BASE_DIR, 'test.jpg')
@@ -55,11 +61,11 @@ const execAsync = promisify(exec);
 //   console.log(total)
 // }
 async function test() {
-    const gifPath = path.join(__dirname, 'long.gif'); // gif文件路径
-    const gifBuf = await tools.imageTools.loadImageFPath(gifPath); // 加载gif 获得gifBuffer
-    const pet = await Petpet.genPetpetGif(gifBuf, true);
+    const gifPath = node_path_1.default.join(__dirname, 'long.gif'); // gif文件路径
+    const gifBuf = await index_1.default.imageTools.loadImageFPath(gifPath); // 加载gif 获得gifBuffer
+    const pet = await index_2.Petpet.genPetpetGif(gifBuf, true);
     if (pet instanceof Buffer) {
-        tools.gifTools.saveGifToFile(pet, path.join(MY_PLUGIN_DIR, 'out/testGif.gif'));
+        index_1.default.gifTools.saveGifToFile(pet, node_path_1.default.join(exports.MY_PLUGIN_DIR, 'out/testGif.gif'));
     }
 }
 test();
