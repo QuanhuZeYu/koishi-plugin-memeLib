@@ -1,6 +1,6 @@
-import sharp from 'sharp';
+import sharp from 'node_modules/sharp/lib/index';
 import fs from 'node:fs/promises'
-import  tools  from '.';
+import  tools  from './index';
 import path from 'node:path';
 
 /**

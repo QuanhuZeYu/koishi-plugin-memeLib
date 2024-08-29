@@ -1,10 +1,10 @@
 import path from "node:path";
 
 import { FrameData } from "../../tools/gifTools";
-import sharp from "sharp";
+import sharp from "node_modules/sharp/lib/index";
 import Ffmpeg from "fluent-ffmpeg";
 import { PassThrough, Readable } from "stream";
-import  tools  from "src/tools";
+import  tools  from "../../tools/index";
 
 const petFps = 15;
 const frameTime = 15 / 1000;

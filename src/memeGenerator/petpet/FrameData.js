@@ -1,21 +1,14 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.frames = exports.BASE_DATA = void 0;
-exports.genPetpetGif = genPetpetGif;
-const node_path_1 = __importDefault(require("node:path"));
-const sharp_1 = __importDefault(require("sharp"));
-const fluent_ffmpeg_1 = __importDefault(require("fluent-ffmpeg"));
-const stream_1 = require("stream");
-const tools_1 = __importDefault(require("src/tools"));
+import path from "node:path";
+import sharp from "node_modules/sharp/lib/index";
+import Ffmpeg from "fluent-ffmpeg";
+import { PassThrough, Readable } from "stream";
+import tools from "../../tools/index";
 const petFps = 15;
 const frameTime = 15 / 1000;
 const frameCounts = 5;
-exports.BASE_DATA = { petFps, frameTime, frameCounts };
+export const BASE_DATA = { petFps, frameTime, frameCounts };
 // 手部合成的帧数据
-exports.frames = [
+export const frames = [
     { x: 14, y: 20, width: 98, height: 98 },
     { x: 12, y: 33, width: 101, height: 85 },
     { x: 8, y: 40, width: 110, height: 76 },
@@ -46,10 +39,10 @@ async function createFrame(inputImg, handImg, frame, option = {
     }
     try {
         // 缩放输入图片并合成到背景图片
-        const resizedInputImg = await (0, sharp_1.default)(inputImg)
+        const resizedInputImg = await sharp(inputImg)
             .resize(frame.width, frame.height)
             .toBuffer();
-        return await (0, sharp_1.default)(handImg)
+        return await sharp(handImg)
             .composite([
             {
                 input: resizedInputImg,
@@ -62,9 +55,9 @@ async function createFrame(inputImg, handImg, frame, option = {
     }
     catch (err) {
         console.error('创建帧时发生错误:', err);
-        const bo = tools_1.default.imageTools.isPng(inputImg);
-        const bo2 = tools_1.default.imageTools.isJpg(inputImg);
-        const ho = tools_1.default.imageTools.isPng(handImg);
+        const bo = tools.imageTools.isPng(inputImg);
+        const bo2 = tools.imageTools.isJpg(inputImg);
+        const ho = tools.imageTools.isPng(handImg);
         // console.log(`是否为png 输入:${bo}, 原图:${ho}; 输入Jpg:${bo2}`)
         throw err;
     }
@@ -116,7 +109,7 @@ async function loadHandImages(frames) {
     // 使用Promise.all并行读取所有图像，以提高加载效率
     return Promise.all(frames.map((_, index) => 
     // 使用sharp读取图像文件，并将其转换为Buffer
-    (0, sharp_1.default)(node_path_1.default.join(__dirname, `images/${index}.png`))
+    sharp(path.join(__dirname, `images/${index}.png`))
         .toBuffer()
         .catch((err) => {
         // 捕获并打印任何读取图像时发生的错误
@@ -131,14 +124,14 @@ async function loadHandImages(frames) {
  */
 function generateGif(frameBuffers) {
     // 创建一个 PassThrough 流，用于传输 GIF 数据
-    const outStream = new stream_1.PassThrough();
+    const outStream = new PassThrough();
     // 存储 GIF 数据块的数组
     const buffers = [];
     // 返回一个 Promise，用于处理异步的 GIF 生成过程
     return new Promise((resolve, reject) => {
         // 创建一个 Ffmpeg 转码任务
-        (0, fluent_ffmpeg_1.default)()
-            .input(new stream_1.Readable({
+        Ffmpeg()
+            .input(new Readable({
             // 读取 frameBuffers 中的每一帧数据
             read() {
                 for (const buffer of frameBuffers) {
@@ -149,8 +142,8 @@ function generateGif(frameBuffers) {
             }
         }))
             .inputFormat("image2pipe") // 设置输入格式为 image2pipe，表示通过管道传递图像数据
-            .inputFPS(exports.BASE_DATA.petFps) // 设置输入帧率
-            .outputOptions("-vf", `fps=${exports.BASE_DATA.petFps}`) // 输出视频过滤器，调整帧率
+            .inputFPS(BASE_DATA.petFps) // 设置输入帧率
+            .outputOptions("-vf", `fps=${BASE_DATA.petFps}`) // 输出视频过滤器，调整帧率
             .toFormat("gif") // 转换输出格式为 gif
             .pipe(outStream) // 将处理后的数据传输到 outStream
             .on("error", reject); // 处理错误事件，如果发生错误则调用 reject
@@ -171,8 +164,8 @@ function generateGif(frameBuffers) {
 async function genPetpetGif(inputImg, isGif = false) {
     if (!isGif) {
         try {
-            const hands = await loadHandImages(exports.frames);
-            const frameBuffers = await Promise.all(exports.frames.map((frameData, index) => createFrame(inputImg, hands[index], frameData)));
+            const hands = await loadHandImages(frames);
+            const frameBuffers = await Promise.all(frames.map((frameData, index) => createFrame(inputImg, hands[index], frameData)));
             return await generateGif(frameBuffers);
         }
         catch (err) {
@@ -182,14 +175,14 @@ async function genPetpetGif(inputImg, isGif = false) {
     }
     else if (isGif) {
         try {
-            const handImgs = exports.BASE_DATA.frameCounts;
+            const handImgs = BASE_DATA.frameCounts;
             let _b = false;
             let oldInputs = [];
             let inputCounts = 0;
             while (_b === false) {
-                oldInputs = await tools_1.default.gifTools.extractGifFramesFromBuffer(inputImg, undefined, 15);
+                oldInputs = await tools.gifTools.extractGifFramesFromBuffer(inputImg, undefined, 15);
                 inputCounts = oldInputs.length;
-                _b = tools_1.default.imageTools.isPng(oldInputs[inputCounts - 1]);
+                _b = tools.imageTools.isPng(oldInputs[inputCounts - 1]);
                 // console.log(`最后一帧是否为Png:${_b}`)
             }
             // 深拷贝 oldInputs
@@ -204,13 +197,13 @@ async function genPetpetGif(inputImg, isGif = false) {
                 const forTime = targetCount / handImgs;
                 const newFrames = [];
                 for (let i = 0; i < forTime; i++) {
-                    newFrames.push(...exports.frames);
+                    newFrames.push(...frames);
                 }
                 return newFrames;
             };
             const _newFrames = newFrames();
             // console.log(`目标帧数: ${targetCount}`);
-            const hands = await loadHandImages(exports.frames);
+            const hands = await loadHandImages(frames);
             // console.log(`加载手部图像完成: ${hands.length}`);
             const frameBuffers = await Promise.all(_newFrames.map((frameData, index) => {
                 const handValue = index % handImgs;
@@ -244,6 +237,7 @@ async function genPetpetGif(inputImg, isGif = false) {
         }
     }
 }
+export { genPetpetGif };
 // 工具函数区
 function gcd(a, b) {
     // 使用欧几里得算法计算最大公约数

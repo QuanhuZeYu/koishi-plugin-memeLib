@@ -5,7 +5,7 @@ import { PassThrough, Readable } from 'node:stream';
 import { tmpdir } from 'os';
 import { randomUUID } from 'crypto';
 import { writeFile } from 'fs/promises';
-import  tools  from '.';
+import  tools  from './index';
 // import gifFrames from 'gif-frames';
 
 export interface FrameData {

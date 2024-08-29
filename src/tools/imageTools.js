@@ -1,12 +1,7 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const sharp_1 = __importDefault(require("sharp"));
-const promises_1 = __importDefault(require("node:fs/promises"));
-const _1 = __importDefault(require("."));
-const node_path_1 = __importDefault(require("node:path"));
+import sharp from 'node_modules/sharp/lib/index';
+import fs from 'node:fs/promises';
+import tools from './index';
+import path from 'node:path';
 /**
  *
  * @param absPath
@@ -14,7 +9,7 @@ const node_path_1 = __importDefault(require("node:path"));
  */
 async function loadImageFPath(absPath) {
     try {
-        const imgBuf = await promises_1.default.readFile(absPath);
+        const imgBuf = await fs.readFile(absPath);
         return imgBuf;
     }
     catch (error) {
@@ -33,11 +28,11 @@ async function loadImageFPath(absPath) {
  */
 async function saveImageFBuffer(imgBuf, fileName) {
     // 确保文件所在目录存在，如果不存在则创建
-    const parentDir = node_path_1.default.join(fileName, '..');
-    _1.default.dirTools.ensureDirectoryExists(parentDir);
+    const parentDir = path.join(fileName, '..');
+    tools.dirTools.ensureDirectoryExists(parentDir);
     try {
         // 将缓冲区数据异步写入文件，减少IO阻塞风险
-        await promises_1.default.writeFile(fileName, imgBuf);
+        await fs.writeFile(fileName, imgBuf);
         // 成功保存文件后在控制台打印消息
         console.log(`文件已成功保存为 ${fileName}`);
     }
@@ -58,7 +53,7 @@ async function cropToCircle(imageBuffer) {
         // 读取图像
         // const image = sharp(inputPath);
         // 使用 Sharp 处理内存中的图像
-        const image = (0, sharp_1.default)(imageBuffer);
+        const image = sharp(imageBuffer);
         // 获取图像元数据
         const metadata = await image.metadata();
         const width = metadata.width;
@@ -122,4 +117,4 @@ function isJpg(buffer) {
     return buffer.length >= 3 && buffer.compare(jpgSignature, 0, 3, 0, 3) === 0;
 }
 const imageTools = { cropToCircle, loadImageFPath, saveImageFBuffer, isPng, isGif, isJpg };
-exports.default = imageTools;
+export default imageTools;
