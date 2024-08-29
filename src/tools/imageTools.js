@@ -5,6 +5,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const sharp_1 = __importDefault(require("sharp"));
 const promises_1 = __importDefault(require("node:fs/promises"));
+const _1 = __importDefault(require("."));
+const node_path_1 = __importDefault(require("node:path"));
 /**
  *
  * @param absPath
@@ -20,14 +22,30 @@ async function loadImageFPath(absPath) {
         throw error; // 抛出错误以便调用者处理
     }
 }
+/**
+ * 异步函数：将图像缓冲区的数据保存为指定文件名的文件
+ * @param imgBuf 图像数据的缓冲区对象，通常来自图像处理或转换操作
+ * @param fileName 要保存的文件名，包括路径和文件扩展名；即完整路径
+ * @returns 无返回值
+ *
+ * 此函数首先确保文件所在的目录存在，然后尝试将缓冲区数据写入文件
+ * 如果写入操作成功，它会在控制台打印成功消息；如果失败，则会打印错误信息并抛出错误
+ */
 async function saveImageFBuffer(imgBuf, fileName) {
+    // 确保文件所在目录存在，如果不存在则创建
+    const parentDir = node_path_1.default.join(fileName, '..');
+    _1.default.dirTools.ensureDirectoryExists(parentDir);
     try {
+        // 将缓冲区数据异步写入文件，减少IO阻塞风险
         await promises_1.default.writeFile(fileName, imgBuf);
+        // 成功保存文件后在控制台打印消息
         console.log(`文件已成功保存为 ${fileName}`);
     }
     catch (error) {
+        // 打印保存文件时出现的错误信息
         console.error(`保存文件时出错: ${fileName}`, error);
-        throw error; // 抛出错误以便调用者处理
+        // 抛出错误以便调用者处理
+        throw error;
     }
 }
 /**

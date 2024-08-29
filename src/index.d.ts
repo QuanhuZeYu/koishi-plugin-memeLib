@@ -11,7 +11,10 @@ export declare const MemeGenerator: {
         };
         gifTools: {
             saveGifToFile: (gifBuffer: Buffer, outputPath: string) => Promise<void>;
-            extractGifFramesFromBuffer: (gifBuffer: Buffer, outputDir: string) => Promise<void>;
+            extractGifFramesFromBuffer: (gifBuffer: Buffer, outputDir?: string, fps?: number) => Promise<void | Buffer[]>;
+        };
+        dirTools: {
+            ensureDirectoryExists: (dirPath: string) => void;
         };
     };
 };

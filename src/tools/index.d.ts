@@ -1,4 +1,4 @@
-export declare const tools: {
+declare const tools: {
     imageTools: {
         cropToCircle: (imageBuffer: Buffer) => Promise<Buffer | undefined>;
         loadImageFPath: (absPath: string) => Promise<Buffer>;
@@ -9,6 +9,10 @@ export declare const tools: {
     };
     gifTools: {
         saveGifToFile: (gifBuffer: Buffer, outputPath: string) => Promise<void>;
-        extractGifFramesFromBuffer: (gifBuffer: Buffer, outputDir: string) => Promise<void>;
+        extractGifFramesFromBuffer: (gifBuffer: Buffer, outputDir?: string, fps?: number) => Promise<void | Buffer[]>;
+    };
+    dirTools: {
+        ensureDirectoryExists: (dirPath: string) => void;
     };
 };
+export default tools;

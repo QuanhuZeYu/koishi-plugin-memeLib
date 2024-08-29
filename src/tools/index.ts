@@ -1,5 +1,8 @@
 import imageTools from "./imageTools";
-import gifTools from '../tools/gifTools'
+import gifTools from './gifTools'
+import dirTools from './dirTools'
 
 // 圆形裁切工具集
-export const tools = {imageTools, gifTools}
+const tools = {imageTools, gifTools, dirTools}
+
+export default tools

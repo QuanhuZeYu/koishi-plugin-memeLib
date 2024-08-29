@@ -1,81 +1,193 @@
 import Ffmpeg from 'fluent-ffmpeg';
 import fs from 'node:fs'
 import path from "node:path";
-import { PassThrough } from 'node:stream';
+import { PassThrough, Readable } from 'node:stream';
+import { tmpdir } from 'os';
+import { randomUUID } from 'crypto';
+import { writeFile } from 'fs/promises';
+import  tools  from '.';
+// import gifFrames from 'gif-frames';
 
 export interface FrameData {
-    x:number
-    y:number
-    width:number
-    height:number
+    x: number
+    y: number
+    width: number
+    height: number
 }
 
 /**
  * 检查并创建输出路径
  * @param dirPath 要检查或创建的目录路径
  */
-function ensureDirectoryExists(dirPath: string): void {
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
-    console.log(`目录已创建: ${dirPath}`);
-  } else {
-    // console.log(`目录已存在: ${dirPath}`);
-  }
-}
-
 async function saveGifToFile(gifBuffer: Buffer, outputPath: string): Promise<void> {
-  try {
-    // 验证 GIF buffer
-    if (!Buffer.isBuffer(gifBuffer) || gifBuffer.length === 0) {
-      throw new Error('提供的 GIF buffer 无效');
+    try {
+        // 验证 GIF buffer
+        if (!Buffer.isBuffer(gifBuffer) || gifBuffer.length === 0) {
+            throw new Error('提供的 GIF buffer 无效');
+        }
+
+        // 验证输出路径
+        const resolvedPath = path.resolve(outputPath);
+        if (path.dirname(resolvedPath) === resolvedPath) {
+            throw new Error('输出路径无效或没有目录');
+        }
+
+        // 确保目录存在
+        const dir = path.dirname(resolvedPath);
+        await fs.promises.mkdir(dir, { recursive: true });
+
+        // 写入 GIF buffer 到文件
+        await fs.promises.writeFile(resolvedPath, gifBuffer);
+        // console.log(`GIF 已保存到 ${resolvedPath}`);
+    } catch (error: any) {
+        console.error('保存 GIF 时发生错误:', error.message);
+        // 重新抛出错误以便上层调用处理
+        throw error;
     }
-
-    // 验证输出路径
-    const resolvedPath = path.resolve(outputPath);
-    if (path.dirname(resolvedPath) === resolvedPath) {
-      throw new Error('输出路径无效或没有目录');
-    }
-
-    // 确保目录存在
-    const dir = path.dirname(resolvedPath);
-    await fs.promises.mkdir(dir, { recursive: true });
-
-    // 写入 GIF buffer 到文件
-    await fs.promises.writeFile(resolvedPath, gifBuffer);
-    console.log(`GIF 已保存到 ${resolvedPath}`);
-  } catch (error:any) {
-    console.error('保存 GIF 时发生错误:', error.message);
-    // 重新抛出错误以便上层调用处理
-    throw error;
-  }
 }
 
-// 从 Buffer 提取 GIF 的所有帧
-function extractGifFramesFromBuffer(gifBuffer: Buffer, outputDir: string): Promise<void> {
-  ensureDirectoryExists(outputDir)
+function extractGifFramesFromBuffer(
+    gifBuffer: Buffer, 
+    outputDir?: string, 
+    fps?: number
+): Promise<void | Buffer[]> {
+    if (!gifBuffer) {
+        throw new Error('无效的 GIF 缓冲区');
+    }
+
+    if (outputDir) {
+        tools.dirTools.ensureDirectoryExists(outputDir);
+
+        return new Promise<void>((resolve, reject) => {
+            const inputStream = new PassThrough();
+            inputStream.end(gifBuffer);
+
+            const ffmpegCommand = Ffmpeg()
+                .input(inputStream)
+                .inputFormat('gif')
+                .output(path.join(outputDir, 'frame_%03d.png'))
+                .on('end', () => {
+                    // console.log('帧提取完成');
+                    resolve();
+                })
+                .on('error', (err) => {
+                    console.error('提取帧时发生错误[1]:', err);
+                    reject(err);
+                });
+
+            if (fps) {
+                ffmpegCommand.outputOptions('-vf', `fps=${fps}`);
+            }
+
+            ffmpegCommand.run();
+        });
+    } else {
+        return new Promise<Buffer[]>((resolve, reject) => {
+            const inputStream = new PassThrough();
+            inputStream.end(gifBuffer);
+
+            const frameBuffers: Buffer[] = [];
+            const outputStream = new PassThrough();
+
+            outputStream.on('data', (chunk) => {
+                frameBuffers.push(Buffer.from(chunk));
+            });
+
+            outputStream.on('end', () => {
+                // console.log('所有帧提取完成');
+                resolve(frameBuffers);
+            });
+
+            outputStream.on('error', (err) => {
+                console.error('提取帧时发生错误[2]:', err);
+                reject(err);
+            });
+
+            const ffmpegCommand = Ffmpeg()
+                .input(inputStream)
+                .inputFormat('gif')
+                .output(outputStream)
+                .outputFormat('image2pipe')
+                .outputOptions('-vcodec', 'png')
+                .on('end', () => {
+                    // console.log('处理完成');
+                })
+                .on('error', (err) => {
+                    console.error('提取帧时发生错误[3]:', err);
+                    reject(err);
+                });
+
+            if (fps) {
+                ffmpegCommand.outputOptions('-vf', `fps=${fps}`);
+            }
+
+            ffmpegCommand.run();
+        });
+    }
+}
+
+
+/** 计算 GIF 的总帧数 通过临时文件*/
+// async function getGifFrameCount(gifBuffer: Buffer): Promise<number> {
+//     const tempFilePath = await bufferToTempFile(gifBuffer);
+    
+//     return new Promise((resolve, reject) => {
+//       Ffmpeg.ffprobe(tempFilePath, (err, metadata) => {
+//         if (err) {
+//           reject(err);
+//           return;
+//         }
+        
+//         // 删除临时文件
+//         unlink(tempFilePath).catch(console.error);
+        
+//         // 遍历每个视频流的元数据来计算帧数
+//         let frameCount = 0;
+//         if (metadata && metadata.streams) {
+//           metadata.streams.forEach((stream) => {
+//             if (stream.codec_type === 'video' && stream.nb_frames) {
+//               frameCount += parseInt(stream.nb_frames, 10);
+//             }
+//           });
+//         }
   
-  return new Promise((resolve, reject) => {
-    const inputStream = new PassThrough();
-    inputStream.end(gifBuffer);
+//         resolve(frameCount);
+//       });
+//     });
+// }
 
-    Ffmpeg()
-      .input(inputStream)
-      .inputFormat('gif')
-      .output(path.join(outputDir, 'frame_%03d.png'))
-      .outputOptions('-vf', 'fps=15') // 提取每帧
-      .on('end', () => {
-        console.log('帧提取完成');
-        resolve();
-      })
-      .on('error', (err) => {
-        console.error('提取帧时发生错误:', err);
-        reject(err);
-      })
-      .run();
-  });
+
+/** 计算 GIF 的总帧数 直接读取Buffer*/
+// async function getGifFrameCount(gifBuffer: Buffer): Promise<number> {
+//     try {
+//       const frames = await gifFrames({ url: gifBuffer, frames: 'all', outputType: 'canvas' });
+//       return frames.length;
+//     } catch (error) {
+//       console.error('Error calculating frame count:', error);
+//       throw error;
+//     }
+// }
+  
+
+
+function bufferToStream(buffer: Buffer) {
+    const stream = new Readable();
+    stream.push(buffer);
+    stream.push(null); // 结束流
+    return stream;
 }
 
 
-const gifTools = {saveGifToFile, extractGifFramesFromBuffer}
+/** 将 Buffer 转换为临时文件 */
+async function bufferToTempFile(buffer: Buffer): Promise<string> {
+    const tempFilePath = path.join(tmpdir(), `${randomUUID()}.gif`);
+    await writeFile(tempFilePath, buffer);
+    return tempFilePath;
+  }
+
+
+const gifTools = { 
+    saveGifToFile,extractGifFramesFromBuffer
+}
 
 export default gifTools
