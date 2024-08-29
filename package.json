@@ -1,6 +1,6 @@
 {
   "name": "@quanhuzeyu/koishi-plugin-memelib",
-  "version": "0.1.2-rc.1",
+  "version": "0.1.2-rc.2",
   "main": "src/index.js",
   "private": false,
   "files": [
