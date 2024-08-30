@@ -1,4 +1,4 @@
-import sharp from 'node_modules/sharp/lib/index';
+import sharp from 'sharp';
 import fs from 'node:fs/promises'
 import  tools  from './index';
 import path from 'node:path';

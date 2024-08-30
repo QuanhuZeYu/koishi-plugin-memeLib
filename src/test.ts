@@ -4,7 +4,9 @@ import { exec } from "node:child_process";
 
 import  tools  from "./tools/index";
 const CTC = tools.imageTools
-import { Petpet } from "./memeGenerator/petpet/index";
+import { BASE_DATA, createFrame, frames, loadHandImages } from "./memeGenerator/petpet/FrameData";
+import { MemeGenerator } from "src";
+import sharp from "sharp";
 
 export const MY_PLUGIN_DIR = path.join(__dirname);
 const execAsync = promisify(exec);
@@ -21,7 +23,7 @@ const execAsync = promisify(exec);
 //   const ava = await CTC.loadImageFPath(path.join(__dirname, `test.jpg`))
 //   const cirAva = await CTC.cropToCircle(ava)
 //   if (cirAva instanceof Buffer) {
-//     const result = await Petpet.genPetpetGif(cirAva) as unknown as Buffer
+//     const result = await MemeGenerator.Petpet(cirAva) as unknown as Buffer
 //     if (result instanceof Buffer){
 //       console.log(`生成成功，GIF大小:${result.length}`)
 //       tools.gifTools.saveGifToFile(result, path.join(__dirname, 'out/output.gif'))
@@ -65,14 +67,62 @@ const execAsync = promisify(exec);
 //   console.log(total)
 // }
 
-
+// 输入gif生成pet
 async function test() {
-  const gifPath = path.join(__dirname, 'long.gif')  // gif文件路径
+  const gifPath = path.join(__dirname, '../tmp/long.gif')  // gif文件路径
   const gifBuf = await tools.imageTools.loadImageFPath(gifPath)  // 加载gif 获得gifBuffer
-  const pet = await Petpet.genPetpetGif(gifBuf, true)
+  console.log(`检测输入GIF: ${tools.imageTools.isGif(gifBuf)}`)
+  const pet = await MemeGenerator.Petpet(gifBuf, true)
   if (pet instanceof Buffer) {
-    tools.gifTools.saveGifToFile(pet, path.join(MY_PLUGIN_DIR, 'out/testGif.gif'))
+    console.log(`petpet gif size:${pet.length}`)
+    tools.gifTools.saveGifToFile(pet, path.join(MY_PLUGIN_DIR, '../out/testGif.gif'))
   }
 }
+
+// 测试手是否是透明
+// async function test() {
+//     const hands = await loadHandImages();
+//     hands.map((hand,index)=>{
+//         const handPath = path.resolve(MY_PLUGIN_DIR,`../out/hand${index}.png`)
+//         tools.imageTools.saveImageFBuffer(hand,handPath)
+//     })
+// }
+
+// 测试合成图像
+// async function test() {
+//     // sharp实例
+//     const INST_SHARP = sharp
+//     // 取第一个合成预处理数据
+//     const frame = frames[0]
+//     // 读一张手部图片
+//     const hands = await loadHandImages()
+//     const hand1 = hands[0]
+//     // 读一张图片
+//     const picPath = path.resolve(MY_PLUGIN_DIR, 'test.jpg')
+//     let pic = await tools.imageTools.loadImageFPath(picPath)
+//     // pic = await INST_SHARP(pic)
+//     //     .resize(frame.width, frame.height)
+//     //     .png()
+//     //     .toBuffer()
+//     // 合成图像
+//     // const result = await sharp(hand1)
+//     //     .composite([
+//     //         {
+//     //             input: pic,
+//     //             left: frame.x,
+//     //             top: frame.y,
+//     //             blend: 'dest-over'
+//     //         }
+//     //     ])
+//     //     .png().toBuffer()
+//     // if (result instanceof Buffer) {
+//     //     tools.imageTools.saveImageFBuffer(result, path.resolve(MY_PLUGIN_DIR, 'out/test.png'))
+//     // }
+
+//     const result = await createFrame(pic, hand1, frame)
+//     if (result instanceof Buffer) {
+//         tools.imageTools.saveImageFBuffer(result, path.resolve(MY_PLUGIN_DIR, '../out/test.png'))
+//     }
+// }
 
 test()
