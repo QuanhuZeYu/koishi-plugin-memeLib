@@ -1,14 +1,11 @@
-import path, { resolve } from "node:path";
+import path from "node:path";
 import fs from 'fs/promises'; // 使用 Promises API 以便使用 async/await
 import sharp from "sharp";
 import Ffmpeg from "fluent-ffmpeg";
-import { PassThrough, Readable } from "stream";
+import { Readable } from "stream";
 
 import { FrameData } from "../../tools/gifTools";
 import  tools  from "../../tools/index";
-import { MY_PLUGIN_DIR } from "src/test";
-import { rejects } from "node:assert";
-import { WriteStream } from "node:fs";
 import { Stream } from "node:stream";
 
 const petFps = 15;
@@ -281,12 +278,13 @@ async function genPetpetGif(inputImg: Buffer, isGif: boolean = false): Promise<B
         let _b = false
         let oldInputs:Buffer[] = []
         let inputCounts:number = 0;
-        while(_b === false) {
-            oldInputs = await tools.gifTools.extractGifFramesFromBuffer(inputImg, undefined, 15) as Buffer[];
-            inputCounts = oldInputs.length;
-            _b = tools.imageTools.isPng(oldInputs[inputCounts-1])
-            // console.log(`最后一帧是否为Png:${_b}`)
-        }
+
+        // oldInputs = await tools.gifTools.extractGifFramesFromBuffer(inputImg, undefined, 15) as Buffer[];
+        oldInputs = await tools.gifTools.extraGIF(inputImg)
+        inputCounts = oldInputs.length;
+        _b = tools.imageTools.isPng(oldInputs[inputCounts-1])
+        // console.log(`最后一帧是否为Png:${_b}`)
+
         // 深拷贝 oldInputs
         const cloneInput = oldInputs.map(buffer => Buffer.from(buffer));
         // 检测最后一帧是否为png

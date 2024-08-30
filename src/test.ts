@@ -5,7 +5,7 @@ import { exec } from "node:child_process";
 import  tools  from "./tools/index";
 const CTC = tools.imageTools
 import { BASE_DATA, createFrame, frames, loadHandImages } from "./memeGenerator/petpet/FrameData";
-import { MemeGenerator } from "src";
+import { MemeGenerator } from "../src";
 import sharp from "sharp";
 
 export const MY_PLUGIN_DIR = path.join(__dirname);

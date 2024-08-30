@@ -1,6 +1,7 @@
 import Ffmpeg from 'fluent-ffmpeg';
 import fs from 'node:fs'
 import path from "node:path";
+import * as _canvaGif from "@canvacord/gif";
 import { PassThrough, Readable } from 'node:stream';
 import { tmpdir } from 'os';
 import { randomUUID } from 'crypto';
@@ -14,6 +15,7 @@ export interface FrameData {
     width: number
     height: number
 }
+
 
 /**
  * 检查并创建输出路径
@@ -127,6 +129,23 @@ function extractGifFramesFromBuffer(
 }
 
 
+async function extraGIF(gifBuffer: Buffer) {
+    // 将 ReadableStream 转换为 Buffer 的辅助函数
+    const streamToBuffer = _canvaGif.streamToBuffer
+    const Decoder = _canvaGif.Decoder
+    const decoder = new Decoder(gifBuffer);
+    const rawFrames = decoder.decode();
+    // 读取每一帧
+    const frames = decoder.toPNG(rawFrames)
+    const promiseBufs:Promise<Buffer>[] = []
+    frames.forEach((frame,i)=>{
+        const buf = streamToBuffer(frame)
+        promiseBufs.push(buf)
+    })
+    return Promise.all(promiseBufs)
+}
+
+
 /** 计算 GIF 的总帧数 通过临时文件*/
 // async function getGifFrameCount(gifBuffer: Buffer): Promise<number> {
 //     const tempFilePath = await bufferToTempFile(gifBuffer);
@@ -187,7 +206,7 @@ async function bufferToTempFile(buffer: Buffer): Promise<string> {
 
 
 const gifTools = { 
-    saveGifToFile,extractGifFramesFromBuffer
+    saveGifToFile,extractGifFramesFromBuffer,extraGIF
 }
 
 export default gifTools
