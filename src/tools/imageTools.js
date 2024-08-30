@@ -3,9 +3,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const index_1 = __importDefault(require("node_modules/sharp/lib/index"));
+const sharp_1 = __importDefault(require("sharp"));
 const promises_1 = __importDefault(require("node:fs/promises"));
-const index_2 = __importDefault(require("./index"));
+const index_1 = __importDefault(require("./index"));
 const node_path_1 = __importDefault(require("node:path"));
 /**
  *
@@ -34,7 +34,7 @@ async function loadImageFPath(absPath) {
 async function saveImageFBuffer(imgBuf, fileName) {
     // 确保文件所在目录存在，如果不存在则创建
     const parentDir = node_path_1.default.join(fileName, '..');
-    index_2.default.dirTools.ensureDirectoryExists(parentDir);
+    index_1.default.dirTools.ensureDirectoryExists(parentDir);
     try {
         // 将缓冲区数据异步写入文件，减少IO阻塞风险
         await promises_1.default.writeFile(fileName, imgBuf);
@@ -58,7 +58,7 @@ async function cropToCircle(imageBuffer) {
         // 读取图像
         // const image = sharp(inputPath);
         // 使用 Sharp 处理内存中的图像
-        const image = (0, index_1.default)(imageBuffer);
+        const image = (0, sharp_1.default)(imageBuffer);
         // 获取图像元数据
         const metadata = await image.metadata();
         const width = metadata.width;

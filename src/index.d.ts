@@ -17,4 +17,7 @@ export declare const MemeGenerator: {
             ensureDirectoryExists: (dirPath: string) => void;
         };
     };
+    _p: {
+        genPetpetGif: typeof import("./memeGenerator/petpet/FrameData").genPetpetGif;
+    };
 };

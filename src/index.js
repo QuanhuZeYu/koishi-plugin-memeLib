@@ -7,4 +7,4 @@ exports.MemeGenerator = void 0;
 const index_1 = require("./memeGenerator/petpet/index");
 const Petpet = index_1.Petpet.genPetpetGif;
 const index_2 = __importDefault(require("./tools/index"));
-exports.MemeGenerator = { Petpet, tools: index_2.default };
+exports.MemeGenerator = { Petpet, tools: index_2.default, _p: index_1.Petpet };
