@@ -199,7 +199,7 @@ export async function loadHandImages(): Promise<Buffer[]> {
     }
 }
 
-function generateGif(frameBuffers: Buffer[], fps?: number): Promise<Buffer> {
+function generateGif(frameBuffers: Buffer[], fps?: number, timeMark?:number): Promise<Buffer> {
     return new Promise((resolve, reject) => {
         const buffers = new Stream.Writable();
         const petFps = fps ? fps : BASE_DATA.petFps;
@@ -226,6 +226,10 @@ function generateGif(frameBuffers: Buffer[], fps?: number): Promise<Buffer> {
                 `[0:v] fps=${petFps},scale=320:-1:flags=lanczos [scaled]; [scaled] palettegen [palette]; [0:v][palette] paletteuse`
             ])
             .on('end', () => {
+                const nowTime = Date.now();
+                // 计算生成用时 timeMark - nowTime 格式化为 "01:23:45"
+                if (timeMark){ 
+                    console.log(`生成用时: ${formatDuration(timeMark,nowTime)}`) }
                 console.log('GIF 生成成功');
                 resolve(Buffer.concat(data)); // 将所有输出数据拼接为一个完整的 Buffer
             })
@@ -251,6 +255,7 @@ function generateGif(frameBuffers: Buffer[], fps?: number): Promise<Buffer> {
  * 最后将所有帧合并生成GIF图像如果在生成过程中发生错误，会抛出异常并打印错误信息
  */
 async function genPetpetGif(inputImg: Buffer, isGif: boolean = false): Promise<Buffer|void> {
+    const timeMark = Date.now();
     if (!isGif) {
         try {
             const hands: Buffer[] = await loadHandImages();
@@ -335,7 +340,7 @@ async function genPetpetGif(inputImg: Buffer, isGif: boolean = false): Promise<B
             // frameBuffers.map((buffer, i)=>{
             //     tools.imageTools.saveImageFBuffer(buffer, path.join(savePath, `frame${i}.png`))
             // })    
-            return await generateGif(frameBuffers)
+            return await generateGif(frameBuffers,undefined,timeMark)
         }
         else {
             throw new Error("生成 GIF 时发生错误[2]");
@@ -356,4 +361,19 @@ export { genPetpetGif };
 function gcd(a: number, b: number): number {
     // 使用欧几里得算法计算最大公约数
     return b === 0 ? a : gcd(b, a % b);
+}
+
+function formatDuration(timeMark: number, nowTime: number): string {
+    // 计算时间差（毫秒）
+    const diffMs = Math.abs(timeMark - nowTime);
+
+    // 转换为秒
+    const seconds = Math.floor(diffMs / 1000) % 60;
+    // 转换为分钟
+    const minutes = Math.floor(diffMs / (1000 * 60)) % 60;
+    // 转换为小时
+    const hours = Math.floor(diffMs / (1000 * 60 * 60)) % 24;
+
+    // 格式化输出
+    return `${String(hours).padStart(2, '0')}时${String(minutes).padStart(2, '0')}分${String(seconds).padStart(2, '0')}秒`;
 }

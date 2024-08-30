@@ -64,7 +64,7 @@ const execAsync = (0, node_util_1.promisify)(node_child_process_1.exec);
 async function test() {
     const gifPath = node_path_1.default.join(__dirname, '../tmp/long.gif'); // gif文件路径
     const gifBuf = await index_1.default.imageTools.loadImageFPath(gifPath); // 加载gif 获得gifBuffer
-    console.log(`检测输入GIF: ${index_1.default.imageTools.isGif(gifBuf)}`);
+    // console.log(`检测输入GIF: ${tools.imageTools.isGif(gifBuf)}`)
     const pet = await src_1.MemeGenerator.Petpet(gifBuf, true);
     if (pet instanceof Buffer) {
         console.log(`petpet gif size:${pet.length}`);

@@ -71,7 +71,7 @@ const execAsync = promisify(exec);
 async function test() {
   const gifPath = path.join(__dirname, '../tmp/long.gif')  // gif文件路径
   const gifBuf = await tools.imageTools.loadImageFPath(gifPath)  // 加载gif 获得gifBuffer
-  console.log(`检测输入GIF: ${tools.imageTools.isGif(gifBuf)}`)
+  // console.log(`检测输入GIF: ${tools.imageTools.isGif(gifBuf)}`)
   const pet = await MemeGenerator.Petpet(gifBuf, true)
   if (pet instanceof Buffer) {
     console.log(`petpet gif size:${pet.length}`)
