@@ -1,5 +1,5 @@
 import path from "path"
-import { FrameData } from "src/interface/FrameData"
+import { FrameData } from "../../interface/FrameData"
 import fs from 'fs/promises'
 
 const userLocs:FrameData[] = [

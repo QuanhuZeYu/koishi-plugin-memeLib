@@ -5,12 +5,13 @@ import Ffmpeg from "fluent-ffmpeg";
 import { Readable } from "stream";
 import * as _canvagif from '@canvacord/gif'
 
-import { FrameData } from "src/interface/FrameData";
+import { FrameData } from "../../interface/FrameData";
 import  tools  from "../../tools/index";
 import { Stream } from "node:stream";
-import logger from "src/tools/logger";
 import { createWriteStream } from "node:fs";
 import { buffer } from "node:stream/consumers";
+
+const logger = tools.logger
 
 const petFps = 15;
 const frameTime = 15 / 1000;
