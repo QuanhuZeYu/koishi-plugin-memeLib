@@ -3,11 +3,14 @@ import fs from 'fs/promises'; // 使用 Promises API 以便使用 async/await
 import sharp from "sharp";
 import Ffmpeg from "fluent-ffmpeg";
 import { Readable } from "stream";
+import * as _canvagif from '@canvacord/gif'
 
-import { FrameData } from "../../tools/gifTools";
+import { FrameData } from "src/interface/FrameData";
 import  tools  from "../../tools/index";
 import { Stream } from "node:stream";
 import logger from "src/tools/logger";
+import { createWriteStream } from "node:fs";
+import { buffer } from "node:stream/consumers";
 
 const petFps = 15;
 const frameTime = 15 / 1000;
@@ -64,7 +67,8 @@ export interface createFrameOption {
  * @param frameData - 包含缩放和合成参数的对象
  * @returns 合成后的图片数据（Buffer）
  */
-export const createFrame = timeIt(async function createFrame(
+export const createFrame = timeIt(
+    async function createFrame(
     input: Buffer,
     hand: Buffer,
     frameData: FrameData,
@@ -108,7 +112,7 @@ export const createFrame = timeIt(async function createFrame(
         logger.error('创建帧时发生错误:', err);
         throw err;
     }
-})
+}, false)
 
 
 /**
@@ -212,24 +216,24 @@ const generateGif = timeIt(async function generateGif(
  * 此函数负责生成一个动图GIF它首先加载手部图像，然后为每一帧创建相应的缓冲区图像，
  * 最后将所有帧合并生成GIF图像如果在生成过程中发生错误，会抛出异常并打印错误信息
  */
-const genPetpetGif =  timeIt(async function genPetpetGif(inputImg: Buffer, isGif: boolean = false): Promise<Buffer | undefined> {
+const genPetpetGif =  timeIt(
+    async function genPetpetGif(inputImg: Buffer, isGif: boolean = false): Promise<Buffer | void> {
     const timeMark = Date.now();
-
-    const hands: Buffer[] = await loadHandImages();
-
     if (!isGif) {
         // 处理静态图像
-        const frameBuffers = await processStaticImage(inputImg, hands);
+        const frameBuffers = await processStaticImage(inputImg);
         return frameBuffers ? generateGif(frameBuffers) : undefined;
     } else {
         // 处理 GIF 图像
-        const frameBuffers = await processGifImage(inputImg, hands);
-        return frameBuffers ? generateGif(frameBuffers, undefined, timeMark) : undefined;
+        const frameBuffers = await processGifImage(inputImg);
+        return frameBuffers ? generateGif(frameBuffers) : undefined;
     }
 })
 
 // 处理静态图像
-async function processStaticImage(inputImg: Buffer, hands: Buffer[]): Promise<Buffer[] | undefined> {
+async function processStaticImage(inputImg: Buffer): Promise<Buffer[] | undefined> {
+    // 读取手部图
+    const hands = await loadHandImages()
 
     // 1.合成图像
     const frameBuffers = await Promise.all(
@@ -243,7 +247,7 @@ async function processStaticImage(inputImg: Buffer, hands: Buffer[]): Promise<Bu
 }
 
 // 处理 GIF 图像
-const processGifImage = timeIt(async function processGifImage(inputImg: Buffer, hands: Buffer[]): Promise<Buffer[] | undefined> {
+const processGifImage = timeIt(async function processGifImage(inputImg: Buffer): Promise<Buffer[] | undefined> {
     // 生成新的帧数据
     const generateNewFrames = timeIt(function generateNewFrames(targetCount: number, handImgs: number): FrameData[] {
         const forTime = targetCount / handImgs;
@@ -254,30 +258,17 @@ const processGifImage = timeIt(async function processGifImage(inputImg: Buffer, 
         }
         return newFrames;
     })
-    
-    const handImgCounts = BASE_DATA.frameCounts;
-    const inputs = await tools.gifTools.extraGIF(inputImg);
-    const inputCounts = inputs.length;
-    const targetCount = Math.abs(handImgCounts * inputCounts) / gcd(handImgCounts, inputCounts);
-    const _newFrames: FrameData[] = generateNewFrames(targetCount, handImgCounts);
-
-    const frameBuffers = await Promise.all(
-        _newFrames.map((frameData, index) => {
-            const handValue = index % handImgCounts;
-            const inputValue = index % inputCounts;
-
-            if (!inputs[inputValue] || !hands[handValue] || !frameData) {
-                throw new Error(`无效的数据: index=${index}, handValue=${handValue}`);
-            }
-            return createFrame(inputs[inputValue], hands[handValue], frameData, undefined);
+    const _frameData = frames
+    const _handCount = BASE_DATA.frameCounts
+    const hands = await loadHandImages()
+    const [_hands,_inputs,_rt] = await tools.gifTools.align2Gif(hands,inputImg)
+    const _frameBuffers = await Promise.all(
+        _hands.map(async(hand,index)=>{
+            const handIndex = index % _handCount
+            return createFrame(_inputs[index],hand,_frameData[handIndex],undefined)
         })
-    );
-
-    if (frameBuffers.every(item => item instanceof Buffer)) {
-        return frameBuffers;
-    } else {
-        throw new Error("生成 GIF 时发生错误[2]，帧生成错误");
-    }
+    )
+    return _frameBuffers
 })
 
 export { genPetpetGif };
