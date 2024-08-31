@@ -1,12 +1,6 @@
-import Ffmpeg from 'fluent-ffmpeg';
 import fs from 'node:fs'
 import path from "node:path";
 import * as _canvaGif from "@canvacord/gif";
-import { PassThrough, Readable } from 'node:stream';
-import { tmpdir } from 'os';
-import { randomUUID } from 'crypto';
-import { writeFile } from 'fs/promises';
-import  tools  from './index';
 // import gifFrames from 'gif-frames';
 
 export interface FrameData {
