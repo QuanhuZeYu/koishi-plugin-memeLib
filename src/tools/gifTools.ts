@@ -66,22 +66,6 @@ async function extraGIF(gifBuffer: Buffer) {
 }
 
 
-function bufferToStream(buffer: Buffer) {
-    const stream = new Readable();
-    stream.push(buffer);
-    stream.push(null); // 结束流
-    return stream;
-}
-
-
-/** 将 Buffer 转换为临时文件 */
-async function bufferToTempFile(buffer: Buffer): Promise<string> {
-    const tempFilePath = path.join(tmpdir(), `${randomUUID()}.gif`);
-    await writeFile(tempFilePath, buffer);
-    return tempFilePath;
-  }
-
-
 const gifTools = { 
     saveGifToFile,extraGIF
 }
