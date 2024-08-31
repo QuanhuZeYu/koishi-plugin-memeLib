@@ -1,3 +1,5 @@
+import logger from "../logger";
+
 // 定义一个泛型类型用于处理异步函数
 type AsyncFunction<T extends (...args: any[]) => any> = ReturnType<T> extends Promise<any> ? T : T;
 
@@ -18,18 +20,18 @@ function createTimeIt(debug: boolean) {
                 return result
                     .then((res) => {
                         const end = performance.now(); // 记录结束时间
-                        console.log(`${func.name} 执行时间: ${(end - start).toFixed(2)} 毫秒`);
+                        logger.info(`${func.name} 执行时间: ${(end - start).toFixed(2)} 毫秒`);
                         return res;
                     })
                     .catch((err) => {
                         const end = performance.now(); // 记录结束时间
-                        console.log(`${func.name} 执行时间: ${(end - start).toFixed(2)} 毫秒`);
+                        logger.info(`${func.name} 执行时间: ${(end - start).toFixed(2)} 毫秒`);
                         return Promise.reject(err);
                     }) as ReturnType<T>; // 强制类型转换为返回类型
             } else {
                 // 处理同步函数
                 const end = performance.now(); // 记录结束时间
-                console.log(`${func.name} 执行时间: ${(end - start).toFixed(2)} 毫秒`);
+                logger.info(`${func.name} 执行时间: ${(end - start).toFixed(2)} 毫秒`);
                 return result as ReturnType<T>; // 强制类型转换为返回类型
             }
         } as AsyncFunction<T>; // 强制类型转换为原函数类型

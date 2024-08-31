@@ -1,11 +1,12 @@
 import fs from 'fs';
+import logger from './logger';
 
 function ensureDirectoryExists(dirPath: string): void {
     if (!fs.existsSync(dirPath)) {
         fs.mkdirSync(dirPath, { recursive: true });
-        console.log(`目录已创建: ${dirPath}`);
+        logger.info(`目录已创建: ${dirPath}`);
     } else {
-        // console.log(`目录已存在: ${dirPath}`);
+        // logger.info(`目录已存在: ${dirPath}`);
     }
 }
 

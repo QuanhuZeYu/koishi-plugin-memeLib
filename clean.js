@@ -18,7 +18,7 @@ function deleteFiles(dir) {
         } else if ((file.endsWith('.js') || file.endsWith('.d.ts') || file.endsWith('.map')) && filePath !== scriptPath) {
             // 删除 .js 和 .d.ts 文件，排除自身
             fs.unlinkSync(filePath);
-            console.log(`Deleted: ${filePath}`);
+            logger.info(`Deleted: ${filePath}`);
         }
     });
 }
@@ -26,4 +26,4 @@ function deleteFiles(dir) {
 // 开始遍历并删除文件
 deleteFiles(scriptDir);
 
-console.log('清理完成');
+logger.info('清理完成');

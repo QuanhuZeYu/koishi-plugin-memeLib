@@ -2,6 +2,7 @@ import sharp from 'sharp';
 import fs from 'node:fs/promises'
 import  tools  from './index';
 import path from 'node:path';
+import logger from './logger';
 
 /**
  * 
@@ -13,7 +14,7 @@ async function loadImageFPath(absPath: string): Promise<Buffer> {
         const imgBuf = await fs.readFile(absPath);
         return imgBuf;
     } catch (error) {
-        console.error(`读取文件时出错: ${absPath}`, error);
+        logger.error(`读取文件时出错: ${absPath}`, error);
         throw error; // 抛出错误以便调用者处理
     }
 }
@@ -35,10 +36,10 @@ async function saveImageFBuffer(imgBuf: Buffer, fileName: string): Promise<void>
         // 将缓冲区数据异步写入文件，减少IO阻塞风险
         await fs.writeFile(fileName, imgBuf);
         // 成功保存文件后在控制台打印消息
-        console.log(`文件已成功保存为 ${fileName}`);
+        logger.info(`文件已成功保存为 ${fileName}`);
     } catch (error) {
         // 打印保存文件时出现的错误信息
-        console.error(`保存文件时出错: ${fileName}`, error);
+        logger.error(`保存文件时出错: ${fileName}`, error);
         // 抛出错误以便调用者处理
         throw error;
     }
@@ -79,10 +80,10 @@ async function cropToCircle(imageBuffer:Buffer): Promise<Buffer|undefined>  {
             input: circleShape,
             blend: 'dest-in'
         }]).png().toBuffer();
-        // console.log("圆形裁剪完成");
+        // logger.info("圆形裁剪完成");
         return outBuf
     } catch (error) {
-      console.error("裁剪过程中发生错误:", error);
+      logger.error("裁剪过程中发生错误:", error);
     }
 }
 

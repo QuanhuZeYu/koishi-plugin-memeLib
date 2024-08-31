@@ -7,6 +7,7 @@ const CTC = tools.imageTools
 import { BASE_DATA, createFrame, frames, loadHandImages } from "./memeGenerator/petpet/FrameData";
 import { MemeGenerator } from "../src";
 import sharp from "sharp";
+import logger from "./tools/logger";
 
 export const MY_PLUGIN_DIR = path.join(__dirname);
 const execAsync = promisify(exec);
@@ -25,7 +26,7 @@ const execAsync = promisify(exec);
 //   if (cirAva instanceof Buffer) {
 //     const result = await MemeGenerator.Petpet(cirAva) as unknown as Buffer
 //     if (result instanceof Buffer){
-//       console.log(`生成成功，GIF大小:${result.length}`)
+//       logger.info(`生成成功，GIF大小:${result.length}`)
 //       tools.gifTools.saveGifToFile(result, path.join(__dirname, 'out/output.gif'))
 //     }
 //   }
@@ -37,16 +38,16 @@ const execAsync = promisify(exec);
 //   const gifPath = path.join(__dirname, 'out/output.gif')
 //   const gifBuf = await tools.imageTools.loadImageFPath(gifPath)
 //   let bo = tools.imageTools.isGif(gifBuf)
-//   console.log(bo)
+//   logger.info(bo)
 //   bo = tools.imageTools.isPng(gifBuf)
-//   console.log(bo)
+//   logger.info(bo)
 
 //   const jpgPath = path.join(__dirname, 'test.jpg')
 //   const jpgBuf = await tools.imageTools.loadImageFPath(jpgPath)
 //   let bo2 = tools.imageTools.isJpg(jpgBuf)
-//   console.log(bo2)
+//   logger.info(bo2)
 //   bo2 = tools.imageTools.isGif(jpgBuf)
-//   console.log(bo2)
+//   logger.info(bo2)
 // }
 
 
@@ -55,7 +56,7 @@ const execAsync = promisify(exec);
 //   const gifPath = path.join(__dirname, 'long.gif')  // gif文件路径
 //   const gifBuf = await tools.imageTools.loadImageFPath(gifPath)  // 加载gif 获得gifBuffer
 //   const time = await tools.gifTools.getGifDuration(gifPath)
-//   console.log(time)
+//   logger.info(time)
 // }
 
 
@@ -64,17 +65,17 @@ const execAsync = promisify(exec);
 //   const gifPath = path.join(__dirname, 'long.gif')  // gif文件路径
 //   const gifBuf = await tools.imageTools.loadImageFPath(gifPath)  // 加载gif 获得gifBuffer
 //   const total = await tools.gifTools.getGifFrameCount(gifBuf)
-//   console.log(total)
+//   logger.info(total)
 // }
 
 // 输入gif生成pet
 async function test() {
   const gifPath = path.join(__dirname, '../tmp/long.gif')  // gif文件路径
   const gifBuf = await tools.imageTools.loadImageFPath(gifPath)  // 加载gif 获得gifBuffer
-  // console.log(`检测输入GIF: ${tools.imageTools.isGif(gifBuf)}`)
+  // logger.info(`检测输入GIF: ${tools.imageTools.isGif(gifBuf)}`)
   const pet = await MemeGenerator.Petpet(gifBuf, true)
   if (pet instanceof Buffer) {
-    console.log(`petpet gif size:${pet.length}`)
+    logger.info(`petpet gif size:${pet.length}`)
     tools.gifTools.saveGifToFile(pet, path.join(MY_PLUGIN_DIR, '../out/testGif.gif'))
   }
 }

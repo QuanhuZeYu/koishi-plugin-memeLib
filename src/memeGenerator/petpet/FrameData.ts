@@ -7,6 +7,7 @@ import { Readable } from "stream";
 import { FrameData } from "../../tools/gifTools";
 import  tools  from "../../tools/index";
 import { Stream } from "node:stream";
+import logger from "src/tools/logger";
 
 const petFps = 15;
 const frameTime = 15 / 1000;
@@ -104,7 +105,7 @@ export const createFrame = timeIt(async function createFrame(
             .png().toBuffer();
     } catch (err) {
         // 错误处理
-        console.error('创建帧时发生错误:', err);
+        logger.error('创建帧时发生错误:', err);
         throw err;
     }
 })
@@ -137,7 +138,7 @@ export const loadHandImages = timeIt(async function loadHandImages(): Promise<Bu
                     .ensureAlpha()  // 确保图像有透明度通道
                     .toBuffer();
             } catch (err) {
-                console.error(`读取图像 ${file} 时发生错误: ${err}`);
+                logger.error(`读取图像 ${file} 时发生错误: ${err}`);
                 throw err; // 捕获错误后抛出，保证调用者能处理
             }
         });
@@ -145,7 +146,7 @@ export const loadHandImages = timeIt(async function loadHandImages(): Promise<Bu
         // 等待所有图像加载完成
         return await Promise.all(imagePromises);
     } catch (err) {
-        console.error(`读取目录 ${dir} 时发生错误: ${err}`);
+        logger.error(`读取目录 ${dir} 时发生错误: ${err}`);
         throw err;
     }
 })
@@ -178,14 +179,14 @@ const generateGif = timeIt(async function generateGif(
         passThrough.on('end', () => {
             const nowTime = Date.now();
             if (timeMark) { 
-                console.log(`生成用时: ${formatDuration(timeMark, nowTime)}`);
+                logger.info(`生成用时: ${formatDuration(timeMark, nowTime)}`);
             }
-            console.log('GIF 生成成功');
+            logger.info('GIF 生成成功');
             resolve(Buffer.concat(data)); // 将所有输出数据拼接为一个完整的 Buffer
         });
 
         passThrough.on('error', (err) => {
-            console.error('GIF 生成失败:', err);
+            logger.error('GIF 生成失败:', err);
             reject(err);
         });
 
@@ -237,7 +238,7 @@ async function processStaticImage(inputImg: Buffer, hands: Buffer[]): Promise<Bu
     if (frameBuffers.every(buffer => buffer instanceof Buffer)) {
         return frameBuffers;
     } else {
-        console.error(`生成 GIF 时发生错误: 解析帧数据时发生错误`);
+        logger.error(`生成 GIF 时发生错误: 解析帧数据时发生错误`);
     }
 }
 

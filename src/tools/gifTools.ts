@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from "node:path";
 import * as _canvaGif from "@canvacord/gif";
+import  logger  from "../tools/logger";
 // import gifFrames from 'gif-frames';
 
 export interface FrameData {
@@ -34,9 +35,9 @@ async function saveGifToFile(gifBuffer: Buffer, outputPath: string): Promise<voi
 
         // 写入 GIF buffer 到文件
         await fs.promises.writeFile(resolvedPath, gifBuffer);
-        // console.log(`GIF 已保存到 ${resolvedPath}`);
+        // logger.info(`GIF 已保存到 ${resolvedPath}`);
     } catch (error: any) {
-        console.error('保存 GIF 时发生错误:', error.message);
+        logger.error('保存 GIF 时发生错误:', error.message);
         // 重新抛出错误以便上层调用处理
         throw error;
     }
@@ -55,7 +56,7 @@ async function extraGIF(gifBuffer: Buffer) {
         const buf = streamToBuffer(frame)
         promiseBufs.push(buf)
     })
-    console.log(`共提取${frames.length}帧`)
+    logger.info(`共提取${frames.length}帧`)
     return Promise.all(promiseBufs)
 }
 
