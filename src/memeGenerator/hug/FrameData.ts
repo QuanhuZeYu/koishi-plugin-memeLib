@@ -1,5 +1,5 @@
 import path from "path"
-import { ComposeJoin, FrameData } from "../../interface/FrameData"
+import { ComposeJoin, FrameData } from "../../interface/InterfaceData"
 import fs from 'fs/promises'
 import timeIt from "../../tools/decorator/timmer"
 import tools from "../../tools/_index"
