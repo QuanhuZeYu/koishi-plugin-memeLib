@@ -4,11 +4,11 @@ import * as _canvaGif from "@canvacord/gif";
 import  logger  from "../tools/logger";
 import GIFEncoder from 'gifencoder';
 import { Canvas, createCanvas, loadImage } from 'canvas';
-import { BASE_DATA } from '../interface/BASE_DATA';
+import { BASE_DATA, Base_GifQuality } from '../interface/BASE_DATA';
 import { Readable, Stream } from 'node:stream';
 import  concat  from 'concat-stream'
 import Ffmpeg from 'fluent-ffmpeg';
-import { ComposeJoin, createFrameOption, FrameData } from '../interface/FrameData';
+import { ComposeJoin, createFrameOption, FrameData, GifQuality } from '../interface/FrameData';
 import sharp from 'sharp';
 // import gifFrames from 'gif-frames';
 
@@ -269,24 +269,27 @@ async function pngsToGifBuffer_canvas(pngBuffers: Buffer[], gifData: { gifWidth:
 }
 
 
-async function pngsToGifBuffer_ffmpeg(pngBuffers:Buffer[],fps?:number):Promise<Buffer> {
+async function pngsToGifBuffer_ffmpeg(pngBuffers:Buffer[],fps?:number,quality?:GifQuality):Promise<Buffer> {
+    const petFps = fps || BASE_DATA.baseFps;
+    const max_colors = quality?.color || Base_GifQuality.medium.color
+    const bay = quality?.bayer_scale || Base_GifQuality.medium.bayer_scale
+    
+    
+    const command = Ffmpeg();
+    // 创建 PassThrough 流用于 Buffer 数据传递
+    const readable = new Readable({
+        read() {
+            const concatenatedBuffer = Buffer.concat(pngBuffers); // 合并所有缓冲区
+            this.push(concatenatedBuffer); // 推入合并后的缓冲区
+            this.push(null); // 表示流结束
+        }
+    });
+
+    // 创建 PassThrough 流用于 Buffer 数据输出
+    const passThrough = new Stream.PassThrough();
+    const data: Uint8Array[] = [];
+    
     return new Promise((resolve, reject) => {
-        const petFps = fps || BASE_DATA.baseFps;
-        const command = Ffmpeg();
-
-        // 创建 PassThrough 流用于 Buffer 数据传递
-        const readable = new Readable({
-            read() {
-                const concatenatedBuffer = Buffer.concat(pngBuffers); // 合并所有缓冲区
-                this.push(concatenatedBuffer); // 推入合并后的缓冲区
-                this.push(null); // 表示流结束
-            }
-        });
-
-        // 创建 PassThrough 流用于 Buffer 数据输出
-        const passThrough = new Stream.PassThrough();
-        const data: Uint8Array[] = [];
-
         passThrough.on('data', (chunk) => {
             data.push(chunk);
         });
@@ -307,7 +310,8 @@ async function pngsToGifBuffer_ffmpeg(pngBuffers:Buffer[],fps?:number):Promise<B
             .inputFPS(petFps)
             .addOptions([
                 `-filter_complex`, 
-                `[0:v] fps=${petFps},scale=320:-1:flags=lanczos [scaled]; [scaled] palettegen [palette]; [0:v][palette] paletteuse`
+                // `[0:v] fps=${petFps},scale=320:-1:flags=lanczos [scaled]; [scaled] palettegen [palette]; [0:v][palette] paletteuse`
+                `[0:v] fps=${petFps},scale=320:-1:flags=lanczos [scaled]; [scaled] palettegen=max_colors=${max_colors} [palette]; [0:v][palette] paletteuse=dither=bayer:bayer_scale=${bay}:diff_mode=rectangle`
             ])
             .outputOptions('-loop', '0') // 无限循环
             .toFormat('gif')
