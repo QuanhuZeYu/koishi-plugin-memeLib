@@ -1,3 +1,5 @@
+import path from "path";
+
 export const BASE_DATA = {
     baseFps:15,
     frameData:{
@@ -6,3 +8,5 @@ export const BASE_DATA = {
         }
     }
 }
+
+export const MY_PLUGIN_DIR = path.join(__dirname);
