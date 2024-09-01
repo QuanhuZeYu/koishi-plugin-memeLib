@@ -7,7 +7,7 @@ const CTC = tools.imageTools
 import { BASE_DATA, createFrame, frames, loadHandImages } from "./memeGenerator/petpet/FrameData";
 import { MemeGenerator } from "../src";
 import sharp from "sharp";
-import logger from "./tools/logger";
+import logger, { readConfig } from "./tools/logger";
 import { hugFrameData } from "./memeGenerator/hug/FrameData";
 
 export const MY_PLUGIN_DIR = path.join(__dirname);
@@ -128,31 +128,31 @@ const execAsync = promisify(exec);
 // }
 
 // 测试hug
-import { loadImg as hugLoad } from "./memeGenerator/hug/FrameData";
-import { ComposeJoin } from "./interface/FrameData";
-async function test() { 
-    const result = []
-    const savePath = path.resolve(MY_PLUGIN_DIR,'../out/hugTest.gif')
-    const loadImg = tools.imageTools.loadImageFPath
-    const srcs = await hugLoad()
-    const input1 = await loadImg(path.resolve(MY_PLUGIN_DIR,'../tmp/test.jpg'))
-    const frameData1 = hugFrameData.user
-    const input2 = await loadImg(path.resolve(MY_PLUGIN_DIR,'../tmp/test2.jpg'))
-    const frameData2 = hugFrameData.self
-    // 循环底图帧数次
-    for (const [index, src] of srcs.entries()) {
-        // 拼接数据
-        const join:ComposeJoin[] = [
-            {img:input1, frameData:frameData1[index]},
-            {img:input2, frameData:frameData2[index]}
-        ]
-        const composed = await tools.gifTools.compose(src,join)
-        result.push(composed)
-    }
-    // 将png序列转换成GIF
-    const gif = await tools.gifTools.pngsToGifBuffer_ffmpeg(result)
-    // 保存该GIF
-    return await tools.gifTools.saveGifToFile(gif,savePath)
+// import { loadImg as hugLoad } from "./memeGenerator/hug/FrameData";
+// import { ComposeJoin } from "./interface/FrameData";
+// async function test() { 
+//     const result = []
+//     const savePath = path.resolve(MY_PLUGIN_DIR,'../out/hugTest.gif')
+//     const loadImg = tools.imageTools.loadImageFPath
+//     const srcs = await hugLoad()
+//     const input1 = await loadImg(path.resolve(MY_PLUGIN_DIR,'../tmp/test.jpg'))
+//     const frameData1 = hugFrameData.user
+//     const input2 = await loadImg(path.resolve(MY_PLUGIN_DIR,'../tmp/test2.jpg'))
+//     const frameData2 = hugFrameData.self
+//     // 循环底图帧数次
+//     for (const [index, src] of srcs.entries()) {
+//         // 拼接数据
+//         const join:ComposeJoin[] = [
+//             {img:input1, frameData:frameData1[index]},
+//             {img:input2, frameData:frameData2[index]}
+//         ]
+//         const composed = await tools.gifTools.compose(src,join)
+//         result.push(composed)
+//     }
+//     // 将png序列转换成GIF
+//     const gif = await tools.gifTools.pngsToGifBuffer_ffmpeg(result)
+//     // 保存该GIF
+//     return await tools.gifTools.saveGifToFile(gif,savePath)
 
     // const index = 1
     // const loadImg = tools.imageTools.loadImageFPath
@@ -175,6 +175,24 @@ async function test() {
     //     .png()
     //     .toBuffer()
     // tools.imageTools.saveImageFBuffer(result,savePath)
+// }
+
+// 测试正则
+async function test() {
+    const message = '<div>Some content</div><p>Another content</p><span>More content</span>';
+
+    // 正则表达式匹配 `<` 和 `>` 之间的内容
+    const regex = /<([^>]+)>/g; // `[^>]` 表示匹配除 `>` 以外的任何字符
+
+    const result = [];
+    let match;
+
+    while ((match = regex.exec(message)) !== null) {
+        result.push(match[1]); // `match[1]` 是捕获组，即尖括号中的内容
+    }
+
+    logger.info(result); // 输出: ['div', 'p', 'span']
 }
 
+readConfig()
 test()
