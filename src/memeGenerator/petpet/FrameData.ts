@@ -1,16 +1,10 @@
 import path from "node:path";
 import fs from 'fs/promises'; // 使用 Promises API 以便使用 async/await
 import sharp from "sharp";
-import Ffmpeg from "fluent-ffmpeg";
-import { Readable } from "stream";
 import * as _canvagif from '@canvacord/gif'
-import GIFEncoder from "gifencoder";
 
 import { ComposeJoin, FrameData } from "../../interface/FrameData";
 import  tools  from "../../tools/_index";
-import { Stream } from "node:stream";
-import { createWriteStream } from "node:fs";
-import { buffer } from "node:stream/consumers";
 import { createFrameOption } from "../../interface/FrameData";
 
 const logger = tools.logger

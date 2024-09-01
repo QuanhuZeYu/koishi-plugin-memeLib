@@ -103,12 +103,12 @@ function isGif(buffer: Buffer): boolean {
     }
 
     const header = [
-        buffer.readUInt8(0),
-        buffer.readUInt8(1),
-        buffer.readUInt8(2),
-        buffer.readUInt8(3),
-        buffer.readUInt8(4),
-        buffer.readUInt8(5)
+        buffer[0],
+        buffer[1],
+        buffer[2],
+        buffer[3],
+        buffer[4],
+        buffer[5]
     ];
 
     return (

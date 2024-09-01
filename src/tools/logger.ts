@@ -1,4 +1,3 @@
-import { getCurTime } from "./_time";
 import fs from 'fs'
 import path from "path";
 import * as yaml from 'js-yaml'
@@ -13,7 +12,7 @@ export function readConfig() {
     const configPath = path.join(MY_PLUGIN_DIR, '../tmp/config.yml');
 
     if (!fs.existsSync(configPath)) {
-        console.log('配置文件不存在，设置日志为 close');
+        console.log('[memelib] 配置文件不存在，设置日志为 close');
         Logger.closeLog();
         return;
     }
@@ -28,9 +27,9 @@ export function readConfig() {
             : 'log';
 
         Logger.setLevel(logLevel);
-        console.log(`日志级别设置为: ${logLevel}`);
+        console.log(`[memelib] 日志级别设置为: ${logLevel}`);
     } catch (e) {
-        console.error('读取或解析配置文件失败:', e);
+        console.error('[memelib] 读取或解析配置文件失败:', e);
         Logger.closeLog();
     }
 }

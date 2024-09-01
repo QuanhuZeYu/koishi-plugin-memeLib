@@ -58,8 +58,8 @@ const craftHug =timeIt(async function craftHug(input:Buffer,input2:Buffer) {
 async function processStatic(input1: Buffer, input2: Buffer):Promise<Buffer> {
     const result = []
     const srcs = await loadImg()
-    const frameData1 = hugFrameData.user
-    const frameData2 = hugFrameData.self
+    const frameData1 = hugFrameData.self
+    const frameData2 = hugFrameData.user
     // 循环底图帧数次
     for (const [index, src] of srcs.entries()) {
         // 拼接数据
