@@ -1,5 +1,5 @@
 {
-  "name": "@quanhuzeyu/koishi-plugin-memelib",
+  "name": "@quanhuzeyu/memelib",
   "version": "0.1.3-rc.6",
   "main": "src/index.js",
   "private": false,
@@ -15,8 +15,8 @@
     "test": "echo `跳过测试`",
     "clean": "node clean.js",
     "allpub": "npm run pubgit && npm run pubnpm",
-    "pubgit": "npm publish --registry=https://npm.pkg.github.com",
-    "pubnpm": "npm publish --registry=https://registry.npmjs.org"
+    "pubgit": "npm publish --registry=https://npm.pkg.github.com --access=public",
+    "pubnpm": "npm publish --registry=https://registry.npmjs.org --access=public"
   },
   "keywords": [
     "chatbot",
@@ -28,9 +28,10 @@
   "author": "泉户泽雨",
   "description": "",
   "devDependencies": {
+    "@types/concat-stream": "^2.0.3",
     "@types/fluent-ffmpeg": "^2.1.25",
     "@types/gifencoder": "^2.0.3",
-    "@types/node": "^22.5.0",
+    "@types/node": "^22.5.1",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.5.4"
@@ -38,8 +39,10 @@
   "dependencies": {
     "@canvacord/gif": "^1.0.2",
     "canvas": "^2.11.2",
+    "concat-stream": "^2.0.0",
     "fluent-ffmpeg": "^2.1.3",
     "gif-frames": "^1.0.1",
+    "gifencoder": "^2.0.1",
     "sharp": "^0.33.5"
   },
   "publishConfig": {
