@@ -8,6 +8,8 @@ import { BASE_DATA } from '../interface/BASE_DATA';
 import { Readable, Stream } from 'node:stream';
 import  concat  from 'concat-stream'
 import Ffmpeg from 'fluent-ffmpeg';
+import { ComposeJoin, createFrameOption, FrameData } from 'src/interface/FrameData';
+import sharp from 'sharp';
 // import gifFrames from 'gif-frames';
 
 
@@ -224,8 +226,59 @@ async function pngsToGifBuffer_ffmpeg(pngBuffers:Buffer[],fps?:number):Promise<B
 }
 
 
+async function compose(src: Buffer, join: ComposeJoin[]): Promise<Buffer> {
+    let curImg = src; // 当前图像
+
+    // 创建一个 Promise 数组，每个元素是合成操作的 Promise
+    const promises = join.map(async (obj, index) => {
+        // 缩放图像
+        let resizedImg: Buffer | sharp.Sharp = sharp(obj.img);
+        if (obj.frameData.width && obj.frameData.height) {
+            resizedImg = resizedImg.resize(obj.frameData.width, obj.frameData.height);
+        }
+        resizedImg = await resizedImg.png().toBuffer()
+
+        // 获取对应合成选项
+        const blendOption = obj.frameData.blendOption?.blend || BASE_DATA.frameData.blendOption?.blend || 'dest-over';
+
+        // 合成图像
+        const result = await sharp(curImg)
+            .composite([{
+                input: resizedImg,
+                left: obj.frameData.x,
+                top: obj.frameData.y,
+                blend: blendOption as any
+            }])
+            .png()
+            .toBuffer();
+        
+        // 返回结果和索引
+        return { index, result };
+    });
+
+    // 等待所有 Promise 完成
+    const results = await Promise.all(promises);
+
+    // 根据索引排序结果
+    results.sort((a, b) => a.index - b.index);
+
+    // 最后一个合成的结果就是最终图像
+    return results[results.length - 1].result;
+}
+
+
 const gifTools = { 
-    saveGifToFile,extraGIF,align2Gif,pngsToGifBuffer_canvas,pngsToGifBuffer_ffmpeg
+    saveGifToFile,extraGIF,align2Gif,pngsToGifBuffer_canvas,pngsToGifBuffer_ffmpeg,
+    compose
 }
 
 export default gifTools
+
+
+// region 私有函数区
+// 判断传入的所有参数是否是Buffer类型
+function allIsBuffer(...args:Buffer[]) {
+    return args.every(arg => arg instanceof Buffer)
+}
+
+const _isBuffer = Buffer.isBuffer

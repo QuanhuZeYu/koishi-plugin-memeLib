@@ -6,11 +6,12 @@ import { Readable } from "stream";
 import * as _canvagif from '@canvacord/gif'
 import GIFEncoder from "gifencoder";
 
-import { FrameData } from "../../interface/FrameData";
+import { ComposeJoin, FrameData } from "../../interface/FrameData";
 import  tools  from "../../tools/_index";
 import { Stream } from "node:stream";
 import { createWriteStream } from "node:fs";
 import { buffer } from "node:stream/consumers";
+import { createFrameOption } from "../../interface/FrameData";
 
 const logger = tools.logger
 
@@ -34,36 +35,7 @@ export const frames: FrameData[] = [
     { x: 12, y: 20, width: 98, height: 98 }
 ];
 
-export interface createFrameOption {
-    blend:
-        | "clear"
-        | "source"
-        | "over"
-        | "in"
-        | "out"
-        | "atop"
-        | "dest"
-        | "dest-over"
-        | "dest-in"
-        | "dest-out"
-        | "dest-atop"
-        | "xor"
-        | "add"
-        | "saturate"
-        | "multiply"
-        | "screen"
-        | "overlay"
-        | "darken"
-        | "lighten"
-        | "color-dodge"
-        | "colour-dodge"
-        | "color-burn"
-        | "colour-burn"
-        | "hard-light"
-        | "soft-light"
-        | "difference"
-        | "exclusion";
-}
+
 /**
  * 合成图片的异步函数
  * 将输入图片（inputImg）缩放并合成到背景图片（handImg）上
@@ -97,22 +69,28 @@ export const createFrame = timeIt(
     }
 
     try {
+        const join:ComposeJoin[] = [{
+            img: input,
+            frameData:frameData
+        }]
         // 确保输入图片透明背景
-        const resizedInputImg = await sharp(input)
-            .resize(frameData.width, frameData.height) // 确保背景透明
-            .png().toBuffer();
+        const resizedInputImg = await tools.gifTools.compose(hand,join)
+        return resizedInputImg
+        // await sharp(input)
+        //     .resize(frameData.width, frameData.height) // 确保背景透明
+        //     .png().toBuffer();
 
-        // 合成图像
-        return sharp(hand)
-            .composite([
-                {
-                    input: resizedInputImg,
-                    left: frameData.x,
-                    top: frameData.y,
-                    blend: option.blend,
-                },
-            ])
-            .png().toBuffer();
+        // // 合成图像
+        // return sharp(hand)
+        //     .composite([
+        //         {
+        //             input: resizedInputImg,
+        //             left: frameData.x,
+        //             top: frameData.y,
+        //             blend: option.blend,
+        //         },
+        //     ])
+        //     .png().toBuffer();
     } catch (err) {
         // 错误处理
         logger.error('创建帧时发生错误:', err);
