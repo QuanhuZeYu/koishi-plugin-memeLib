@@ -8,7 +8,7 @@ import { BASE_DATA } from '../interface/BASE_DATA';
 import { Readable, Stream } from 'node:stream';
 import  concat  from 'concat-stream'
 import Ffmpeg from 'fluent-ffmpeg';
-import { ComposeJoin, createFrameOption, FrameData } from 'src/interface/FrameData';
+import { ComposeJoin, createFrameOption, FrameData } from '../interface/FrameData';
 import sharp from 'sharp';
 // import gifFrames from 'gif-frames';
 

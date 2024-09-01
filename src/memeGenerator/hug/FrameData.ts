@@ -1,8 +1,8 @@
 import path from "path"
 import { ComposeJoin, FrameData } from "../../interface/FrameData"
 import fs from 'fs/promises'
-import timeIt from "src/tools/decorator/timmer"
-import tools from "src/tools/_index"
+import timeIt from "../../tools/decorator/timmer"
+import tools from "../../tools/_index"
 
 const logger = tools.logger
 
