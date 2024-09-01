@@ -10,7 +10,6 @@ import sharp from "sharp";
 import logger, { readConfig } from "./tools/logger";
 import { hugFrameData } from "./memeGenerator/hug/FrameData";
 
-export const MY_PLUGIN_DIR = path.join(__dirname);
 const execAsync = promisify(exec);
 
 // 测试生成meme
