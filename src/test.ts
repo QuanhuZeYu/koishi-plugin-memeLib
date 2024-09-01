@@ -2,7 +2,7 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { exec } from "node:child_process";
 
-import  tools  from "./tools/index";
+import  tools  from "./tools/_index";
 const CTC = tools.imageTools
 import { BASE_DATA, createFrame, frames, loadHandImages } from "./memeGenerator/petpet/FrameData";
 import { MemeGenerator } from "../src";

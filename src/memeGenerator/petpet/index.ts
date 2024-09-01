@@ -1,3 +1,3 @@
-import {genPetpetGif} from '../petpet/FrameData'
+import craftPetpet from '../petpet/FrameData'
 
-export const Petpet = {genPetpetGif}
+export const Petpet = {craftPetpet}

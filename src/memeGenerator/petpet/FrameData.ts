@@ -4,9 +4,10 @@ import sharp from "sharp";
 import Ffmpeg from "fluent-ffmpeg";
 import { Readable } from "stream";
 import * as _canvagif from '@canvacord/gif'
+import GIFEncoder from "gifencoder";
 
 import { FrameData } from "../../interface/FrameData";
-import  tools  from "../../tools/index";
+import  tools  from "../../tools/_index";
 import { Stream } from "node:stream";
 import { createWriteStream } from "node:fs";
 import { buffer } from "node:stream/consumers";
@@ -16,10 +17,14 @@ const logger = tools.logger
 const petFps = 15;
 const frameTime = 15 / 1000;
 const frameCounts = 5;
+const gifData = {
+    gifWidth: 112,
+    gifHeigh: 112
+}
 
 const timeIt = tools.decorator.timeer
 
-export const BASE_DATA = { petFps, frameTime, frameCounts };
+export const BASE_DATA = { petFps, frameTime, frameCounts, gifData };
 // 手部合成的帧数据
 export const frames: FrameData[] = [
     { x: 14, y: 20, width: 98, height: 98 },
@@ -156,57 +161,12 @@ export const loadHandImages = timeIt(async function loadHandImages(): Promise<Bu
     }
 })
 
-const generateGif = timeIt(async function generateGif(
+const craftPng2Gif = timeIt(async function generateGif(
     frameBuffers: Buffer[], 
-    fps?: number, 
-    timeMark?: number
+    fps?: number
 ): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-        const petFps = fps || BASE_DATA.petFps;
-        const command = Ffmpeg();
-
-        // 创建 PassThrough 流用于 Buffer 数据传递
-        const readable = new Readable({
-            read() {
-                frameBuffers.forEach((buf) => this.push(buf));
-                this.push(null); // 表示流结束
-            }
-        });
-
-        // 创建 PassThrough 流用于 Buffer 数据输出
-        const passThrough = new Stream.PassThrough();
-        const data: Uint8Array[] = [];
-
-        passThrough.on('data', (chunk) => {
-            data.push(chunk);
-        });
-
-        passThrough.on('end', () => {
-            const nowTime = Date.now();
-            if (timeMark) { 
-                logger.info(`生成用时: ${formatDuration(timeMark, nowTime)}`);
-            }
-            logger.info('GIF 生成成功');
-            resolve(Buffer.concat(data)); // 将所有输出数据拼接为一个完整的 Buffer
-        });
-
-        passThrough.on('error', (err) => {
-            logger.error('GIF 生成失败:', err);
-            reject(err);
-        });
-
-        // 配置 ffmpeg 命令
-        command
-            .addInput(readable)
-            .inputFPS(petFps)
-            .addOptions([
-                `-filter_complex`, 
-                `[0:v] fps=${petFps},scale=320:-1:flags=lanczos [scaled]; [scaled] palettegen [palette]; [0:v][palette] paletteuse`
-            ])
-            .outputOptions('-loop', '0') // 无限循环
-            .toFormat('gif')
-            .pipe(passThrough); // 直接传递数据
-    });
+    const gifBuf = tools.gifTools.pngsToGifBuffer_ffmpeg(frameBuffers)
+    return gifBuf
 });
 
 /**
@@ -217,17 +177,16 @@ const generateGif = timeIt(async function generateGif(
  * 此函数负责生成一个动图GIF它首先加载手部图像，然后为每一帧创建相应的缓冲区图像，
  * 最后将所有帧合并生成GIF图像如果在生成过程中发生错误，会抛出异常并打印错误信息
  */
-const genPetpetGif =  timeIt(
+const craftPetpetGif =  timeIt(
     async function genPetpetGif(inputImg: Buffer, isGif: boolean = false): Promise<Buffer | void> {
-    const timeMark = Date.now();
     if (!isGif) {
         // 处理静态图像
         const frameBuffers = await processStaticImage(inputImg);
-        return frameBuffers ? generateGif(frameBuffers) : undefined;
+        return frameBuffers ? craftPng2Gif(frameBuffers) : undefined;
     } else {
         // 处理 GIF 图像
         const frameBuffers = await processGifImage(inputImg);
-        return frameBuffers ? generateGif(frameBuffers) : undefined;
+        return frameBuffers ? craftPng2Gif(frameBuffers) : undefined;
     }
 })
 
@@ -272,7 +231,7 @@ const processGifImage = timeIt(async function processGifImage(inputImg: Buffer):
     return _frameBuffers
 })
 
-export { genPetpetGif };
+export default craftPetpetGif
 
 
 

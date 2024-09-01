@@ -2,6 +2,12 @@ import fs from 'node:fs'
 import path from "node:path";
 import * as _canvaGif from "@canvacord/gif";
 import  logger  from "../tools/logger";
+import GIFEncoder from 'gifencoder';
+import { Canvas, createCanvas, loadImage } from 'canvas';
+import { BASE_DATA } from '../interface/BASE_DATA';
+import { Readable, Stream } from 'node:stream';
+import  concat  from 'concat-stream'
+import Ffmpeg from 'fluent-ffmpeg';
 // import gifFrames from 'gif-frames';
 
 
@@ -134,8 +140,92 @@ async function align2Gif(target: Buffer|Buffer[], input: Buffer):Promise<[Buffer
 }
 
 
+async function pngsToGifBuffer_canvas(pngBuffers: Buffer[], gifData: { gifWidth: number, gifHeigh: number }, fps?: number): Promise<Buffer> {
+    fps = fps ? fps : BASE_DATA.baseFps;
+    const delay = Math.round(1000 / fps);
+    const encoder = new GIFEncoder(gifData.gifWidth, gifData.gifHeigh);
+    const canvas = createCanvas(gifData.gifWidth, gifData.gifHeigh);
+    const ctx = canvas.getContext('2d');
+
+    return new Promise((resolve, reject) => {
+        encoder.start();
+        encoder.setRepeat(0); // 0 为无限循环
+        encoder.setDelay(delay); // 每帧之间的延迟（毫秒）
+        encoder.setQuality(1); // 设置 GIF 的质量（1-30，1 最高）
+        encoder.setTransparent(0x00FF00FF); // 设置透明背景的颜色（这里使用了一个透明的颜色）
+
+        const gifStream = encoder.createReadStream();
+        gifStream.pipe(concat({ encoding: 'buffer' }, resolve));
+
+        (async () => {
+            try {
+                for (const buffer of pngBuffers) {
+                    const img = await loadImage(buffer);
+                    
+                    // 在绘制每一帧之前清空画布
+                    ctx.clearRect(0, 0, gifData.gifWidth, gifData.gifHeigh);
+
+                    ctx.drawImage(img, 0, 0, gifData.gifWidth, gifData.gifHeigh);
+                    encoder.addFrame(ctx as any);
+                }
+                encoder.finish();
+            } catch (error) {
+                reject(error);
+            }
+        })();
+    });
+}
+
+
+async function pngsToGifBuffer_ffmpeg(pngBuffers:Buffer[],fps?:number):Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+        const petFps = fps || BASE_DATA.baseFps;
+        const command = Ffmpeg();
+
+        // 创建 PassThrough 流用于 Buffer 数据传递
+        const readable = new Readable({
+            read() {
+                const concatenatedBuffer = Buffer.concat(pngBuffers); // 合并所有缓冲区
+                this.push(concatenatedBuffer); // 推入合并后的缓冲区
+                this.push(null); // 表示流结束
+            }
+        });
+
+        // 创建 PassThrough 流用于 Buffer 数据输出
+        const passThrough = new Stream.PassThrough();
+        const data: Uint8Array[] = [];
+
+        passThrough.on('data', (chunk) => {
+            data.push(chunk);
+        });
+
+        passThrough.on('end', () => {
+            logger.info('GIF 生成成功');
+            resolve(Buffer.concat(data)); // 将所有输出数据拼接为一个完整的 Buffer
+        });
+
+        passThrough.on('error', (err) => {
+            logger.error('GIF 生成失败:', err);
+            reject(err);
+        });
+
+        // 配置 ffmpeg 命令
+        command
+            .addInput(readable)
+            .inputFPS(petFps)
+            .addOptions([
+                `-filter_complex`, 
+                `[0:v] fps=${petFps},scale=320:-1:flags=lanczos [scaled]; [scaled] palettegen [palette]; [0:v][palette] paletteuse`
+            ])
+            .outputOptions('-loop', '0') // 无限循环
+            .toFormat('gif')
+            .pipe(passThrough); // 直接传递数据
+    });
+}
+
+
 const gifTools = { 
-    saveGifToFile,extraGIF,align2Gif
+    saveGifToFile,extraGIF,align2Gif,pngsToGifBuffer_canvas,pngsToGifBuffer_ffmpeg
 }
 
 export default gifTools
