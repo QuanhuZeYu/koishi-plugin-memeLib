@@ -142,6 +142,96 @@ async function align2Gif(target: Buffer|Buffer[], input: Buffer):Promise<[Buffer
 }
 
 
+async function align3Gif(
+    target1: Buffer | Buffer[],
+    target2: Buffer | Buffer[],
+    input: Buffer
+  ): Promise<[Buffer[], Buffer[], Buffer[], number]> {
+    // 处理 target1 和 target2 的两种输入情况（Buffer 或 Buffer 数组）
+    let targets1: Buffer[] = Array.isArray(target1) ? target1 : await extraGIF(target1);
+    let targets2: Buffer[] = Array.isArray(target2) ? target2 : await extraGIF(target2);
+  
+    // 提取输入 GIF 的 png 序列
+    let inputs: Buffer[] = await extraGIF(input);
+  
+    const target1FramesCount = targets1.length;
+    const target2FramesCount = targets2.length;
+    const inputFramesCount = inputs.length;
+  
+    // 如果所有输入的帧数已经一致，直接返回
+    if (inputFramesCount === target1FramesCount && inputFramesCount === target2FramesCount) {
+      return [targets1, targets2, inputs, 1];
+    }
+  
+    // 如果目标帧数较小，需要倍化目标帧
+    let rt: number = 1; // 倍数，默认是1，只有有目标帧数较小时，才需要倍化
+    let alignedTargets1: Buffer[] = [];
+    let alignedTargets2: Buffer[] = [];
+  
+    // 确定最大的帧数
+    const maxFramesCount = Math.max(target1FramesCount, target2FramesCount, inputFramesCount);
+  
+    // 处理 target1 的帧数
+    if (target1FramesCount < maxFramesCount) {
+      rt = Math.ceil(maxFramesCount / target1FramesCount);
+      for (let i = 0; i < rt; i++) {
+        alignedTargets1 = alignedTargets1.concat(targets1);
+      }
+      alignedTargets1 = alignedTargets1.slice(0, maxFramesCount); // 修正长度以匹配最大帧数
+      targets1 = alignedTargets1;
+    }
+  
+    // 处理 target2 的帧数
+    if (target2FramesCount < maxFramesCount) {
+      rt = Math.ceil(maxFramesCount / target2FramesCount);
+      for (let i = 0; i < rt; i++) {
+        alignedTargets2 = alignedTargets2.concat(targets2);
+      }
+      alignedTargets2 = alignedTargets2.slice(0, maxFramesCount); // 修正长度以匹配最大帧数
+      targets2 = alignedTargets2;
+    }
+  
+    // 处理 input 的帧数
+    let alignedInputs: Buffer[] = [];
+    if (inputFramesCount > maxFramesCount) {
+      // 保留头和尾的帧
+      alignedInputs.push(inputs[0]); // 添加第一个帧
+      alignedInputs.push(inputs[inputs.length - 1]); // 添加最后一个帧
+  
+      // 计算需要抽取的帧数量
+      let framesToRemove = inputFramesCount - maxFramesCount;
+      let left = 1; // 从第二帧开始（已经保留了第一帧）
+      let right = inputs.length - 2; // 到倒数第二帧结束（已经保留了最后一帧）
+  
+      // 使用二分法来抽取中间的帧
+      while (framesToRemove > 0 && left <= right) {
+        const middle = Math.floor((left + right) / 2);
+        if (!alignedInputs.includes(inputs[middle])) {
+          alignedInputs.push(inputs[middle]);
+          framesToRemove--;
+        }
+  
+        if (framesToRemove > 0) {
+          if (alignedInputs.length % 2 === 0) {
+            right--; // 从右侧移除
+          } else {
+            left++; // 从左侧移除
+          }
+        }
+      }
+  
+      // 按原顺序排序抽取的帧
+      alignedInputs.sort((a, b) => inputs.indexOf(a) - inputs.indexOf(b));
+      inputs = alignedInputs;
+    } else {
+      // DO NOTHING
+    }
+  
+    // 最终保证所有 GIF 帧数一致
+    return [targets1, targets2, inputs, rt];
+}
+
+
 async function pngsToGifBuffer_canvas(pngBuffers: Buffer[], gifData: { gifWidth: number, gifHeigh: number }, fps?: number): Promise<Buffer> {
     fps = fps ? fps : BASE_DATA.baseFps;
     const delay = Math.round(1000 / fps);
@@ -228,42 +318,23 @@ async function pngsToGifBuffer_ffmpeg(pngBuffers:Buffer[],fps?:number):Promise<B
 
 async function compose(src: Buffer, join: ComposeJoin[]): Promise<Buffer> {
     let curImg = src; // 当前图像
-
-    // 创建一个 Promise 数组，每个元素是合成操作的 Promise
-    const promises = join.map(async (obj, index) => {
-        // 缩放图像
-        let resizedImg: Buffer | sharp.Sharp = sharp(obj.img);
-        if (obj.frameData.width && obj.frameData.height) {
-            resizedImg = resizedImg.resize(obj.frameData.width, obj.frameData.height);
-        }
-        resizedImg = await resizedImg.png().toBuffer()
-
-        // 获取对应合成选项
-        const blendOption = obj.frameData.blendOption?.blend || BASE_DATA.frameData.blendOption?.blend || 'dest-over';
-
-        // 合成图像
-        const result = await sharp(curImg)
+    const background = {background:{r:0,g:0,b:0,alpha:0}}
+    // 遍历数组
+    for (const [index,obj] of join.entries()) {
+        // 每个数组下的对象处理
+        let img = obj.img
+        const frame = obj.frameData
+        img = await sharp(img).resize(frame.width,frame.height,background).rotate(frame.rotate||0,background).png().toBuffer()
+        curImg = await sharp(curImg)
             .composite([{
-                input: resizedImg,
-                left: obj.frameData.x,
-                top: obj.frameData.y,
-                blend: blendOption as any
+                input:img,
+                left:frame.x,
+                top:frame.y,
+                blend:frame.blendOption as any||"dest-over"
             }])
-            .png()
-            .toBuffer();
-        
-        // 返回结果和索引
-        return { index, result };
-    });
-
-    // 等待所有 Promise 完成
-    const results = await Promise.all(promises);
-
-    // 根据索引排序结果
-    results.sort((a, b) => a.index - b.index);
-
-    // 最后一个合成的结果就是最终图像
-    return results[results.length - 1].result;
+            .png().toBuffer()
+    }
+    return curImg
 }
 
 

@@ -8,6 +8,7 @@ import { BASE_DATA, createFrame, frames, loadHandImages } from "./memeGenerator/
 import { MemeGenerator } from "../src";
 import sharp from "sharp";
 import logger from "./tools/logger";
+import { hugFrameData } from "./memeGenerator/hug/FrameData";
 
 export const MY_PLUGIN_DIR = path.join(__dirname);
 const execAsync = promisify(exec);
@@ -69,16 +70,16 @@ const execAsync = promisify(exec);
 // }
 
 // 输入gif生成pet
-async function test() {
-  const gifPath = path.join(__dirname, '../tmp/long.gif')  // gif文件路径
-  const gifBuf = await tools.imageTools.loadImageFPath(gifPath)  // 加载gif 获得gifBuffer
-  // logger.info(`检测输入GIF: ${tools.imageTools.isGif(gifBuf)}`)
-  const pet = await MemeGenerator.Petpet(gifBuf, true)
-  if (pet instanceof Buffer) {
-    logger.info(`petpet gif size:${pet.length}`)
-    tools.gifTools.saveGifToFile(pet, path.join(MY_PLUGIN_DIR, '../out/testGif.gif'))
-  }
-}
+// async function test() {
+//   const gifPath = path.join(__dirname, '../tmp/long.gif')  // gif文件路径
+//   const gifBuf = await tools.imageTools.loadImageFPath(gifPath)  // 加载gif 获得gifBuffer
+//   // logger.info(`检测输入GIF: ${tools.imageTools.isGif(gifBuf)}`)
+//   const pet = await MemeGenerator.petpet.craftPetpet(gifBuf, true)
+//   if (pet instanceof Buffer) {
+//     logger.info(`petpet gif size:${pet.length}`)
+//     tools.gifTools.saveGifToFile(pet, path.join(MY_PLUGIN_DIR, '../out/testGif.gif'))
+//   }
+// }
 
 // 测试手是否是透明
 // async function test() {
@@ -125,5 +126,55 @@ async function test() {
 //         tools.imageTools.saveImageFBuffer(result, path.resolve(MY_PLUGIN_DIR, '../out/test.png'))
 //     }
 // }
+
+// 测试hug
+import { loadImg as hugLoad } from "./memeGenerator/hug/FrameData";
+import { ComposeJoin } from "./interface/FrameData";
+async function test() { 
+    const result = []
+    const savePath = path.resolve(MY_PLUGIN_DIR,'../out/hugTest.gif')
+    const loadImg = tools.imageTools.loadImageFPath
+    const srcs = await hugLoad()
+    const input1 = await loadImg(path.resolve(MY_PLUGIN_DIR,'../tmp/test.jpg'))
+    const frameData1 = hugFrameData.user
+    const input2 = await loadImg(path.resolve(MY_PLUGIN_DIR,'../tmp/test2.jpg'))
+    const frameData2 = hugFrameData.self
+    // 循环底图帧数次
+    for (const [index, src] of srcs.entries()) {
+        // 拼接数据
+        const join:ComposeJoin[] = [
+            {img:input1, frameData:frameData1[index]},
+            {img:input2, frameData:frameData2[index]}
+        ]
+        const composed = await tools.gifTools.compose(src,join)
+        result.push(composed)
+    }
+    // 将png序列转换成GIF
+    const gif = await tools.gifTools.pngsToGifBuffer_ffmpeg(result)
+    // 保存该GIF
+    return await tools.gifTools.saveGifToFile(gif,savePath)
+
+    // const index = 1
+    // const loadImg = tools.imageTools.loadImageFPath
+    // const hug = MemeGenerator.hug
+    // const savePath = path.resolve(MY_PLUGIN_DIR,'../out/__test__.png')
+    // const self = hugFrameData.other
+    // const src = await loadImg(path.resolve(MY_PLUGIN_DIR,'./memeGenerator/hug/images/0.png'))
+    // let input1 = await loadImg(path.resolve(MY_PLUGIN_DIR,'../tmp/test.jpg'))
+    // let input2 = await loadImg(path.resolve(MY_PLUGIN_DIR,'../tmp/test2.jpg'))
+    // const background = {background:{r:0,g:0,b:0,alpha:0}}
+    // input2 = await sharp(input2)
+    //     .resize(self[index].width,self[index].height, background).rotate(self[index].rotate||0,background).png().toBuffer()
+    // let result = await sharp(src)
+    //     .composite([{
+    //         input:input2,
+    //         left:self[index].x,
+    //         top:self[index].y,
+    //         blend:"dest-over"
+    //     }])
+    //     .png()
+    //     .toBuffer()
+    // tools.imageTools.saveImageFBuffer(result,savePath)
+}
 
 test()

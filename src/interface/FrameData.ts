@@ -3,6 +3,7 @@ export interface FrameData {
     y?: number
     width?: number
     height?: number
+    rotate?: number
     blendOption?:createFrameOption
 }
 

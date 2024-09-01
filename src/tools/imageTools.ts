@@ -131,7 +131,38 @@ function isJpg(buffer: Buffer): boolean {
     return buffer.length >= 3 && buffer.compare(jpgSignature, 0, 3, 0, 3) === 0;
 }
 
+/**
+ * 将两个图片长宽进行对齐
+ * @param input 第一张图片的 Buffer
+ * @param input1 第二张图片的 Buffer
+ * @returns 返回一个 Promise，解析为包含对齐后的两张图片的 Buffer
+ */
+async function align2imgSize(input: Buffer, input1: Buffer): Promise<[Buffer, Buffer]> {
+    // 获取两张图片的尺寸
+    const img1Metadata = await sharp(input).metadata();
+    const img2Metadata = await sharp(input1).metadata();
 
-const imageTools = {cropToCircle, loadImageFPath, saveImageFBuffer, isPng, isGif, isJpg}
+    const width = Math.max(img1Metadata.width || 0, img2Metadata.width || 0); // 选择较大的宽度
+    const height = Math.max(img1Metadata.height || 0, img2Metadata.height || 0); // 选择较大的高度
+
+    // 调整图片尺寸
+    const resizedImg1 = sharp(input).resize(width, height, { fit: 'contain' }).toBuffer();
+    const resizedImg2 = sharp(input1).resize(width, height, { fit: 'contain' }).toBuffer();
+
+    // 返回调整后的图片
+    return Promise.all([resizedImg1, resizedImg2]);
+}
+
+
+async function align3imgSize(target:Buffer,input1:Buffer,input2:Buffer):Promise<[Buffer,Buffer]> {
+    [target,input1] = await align2imgSize(target,input1);
+    [target,input2] = await align2imgSize(target,input2);
+    return [input1,input2]
+}
+
+
+const imageTools = {cropToCircle, loadImageFPath, saveImageFBuffer, isPng, isGif, isJpg,
+    align2imgSize,align3imgSize
+}
 
 export default imageTools

@@ -1,5 +1,5 @@
-import { Petpet as _p } from "./memeGenerator/petpet/index";
-const Petpet = _p.craftPetpet
+import { Petpet as petpet } from "./memeGenerator/petpet/index";
+import hug from './memeGenerator/hug'
 import  tools  from "./tools/_index";
 
-export const MemeGenerator = { Petpet,tools,_p }
+export const MemeGenerator = { tools,petpet,hug }
