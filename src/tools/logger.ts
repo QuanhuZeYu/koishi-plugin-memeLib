@@ -1,4 +1,3 @@
-import { getCurTime } from "./_time";
 import fs from 'fs'
 import path from "path";
 import * as yaml from 'js-yaml'
