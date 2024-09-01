@@ -48,36 +48,31 @@ const craftHug =timeIt(async function craftHug(input:Buffer,input2:Buffer) {
         return result_
     } else {
         // 3.2含有GIF的处理流程
+        throw new Error("GIF参数合成功能还未实现!!!")
     }
 })
 
 /**
  * 传进来的两个参数必须是单张图像的Buffer
  * */
-async function processStatic(input1: Buffer, input2: Buffer) {
-    const compose = tools.gifTools.compose;
-    const pngs2gif = tools.gifTools.pngsToGifBuffer_ffmpeg;
-    let result: Buffer[] = [];
-
-    // 1.加载底图
-    const srcs = await loadImg();
-
-    srcs.map(async (src,index)=>{
-        // 拼接输入参数
-        const join: ComposeJoin[] = [
-            { img: input2, frameData: hugFrameData.self[index] },
-            { img: input1, frameData: hugFrameData.user[index] },
-            
-        ];
-        
-        // 按顺序等待 compose 操作完成
-        const _result = await compose(src, join);
-        logger.debug(`[${index + 1}/${srcs.length}]`, `合成完成`);
-        result.push(_result);
-    })
-    // 将合成后的图像序列转换为 GIF
-    const gif = await pngs2gif(result);
-    return gif;
+async function processStatic(input1: Buffer, input2: Buffer):Promise<Buffer> {
+    const result = []
+    const srcs = await loadImg()
+    const frameData1 = hugFrameData.user
+    const frameData2 = hugFrameData.self
+    // 循环底图帧数次
+    for (const [index, src] of srcs.entries()) {
+        // 拼接数据
+        const join:ComposeJoin[] = [
+            {img:input1, frameData:frameData1[index]},
+            {img:input2, frameData:frameData2[index]}
+        ]
+        const composed = await tools.gifTools.compose(src,join)
+        result.push(composed)
+    }
+    // 将png序列转换成GIF
+    const gif = await tools.gifTools.pngsToGifBuffer_ffmpeg(result)
+    return gif
 }
 
 export const loadImg = timeIt(async function loadImg() {
