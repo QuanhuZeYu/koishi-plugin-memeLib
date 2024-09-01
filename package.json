@@ -1,6 +1,6 @@
 {
   "name": "@quanhuzeyu/memelib",
-  "version": "0.1.4-rc.2",
+  "version": "0.1.4-rc.3",
   "main": "src/index.js",
   "private": false,
   "files": [
