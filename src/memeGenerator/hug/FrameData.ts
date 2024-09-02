@@ -100,8 +100,8 @@ async function processGif(input1:Buffer,input2:Buffer):Promise<Buffer|void> {
         for(const src of target) {
             // 组装合成数据
             const join:ComposeJoin[] = [
-                {img:input2,frameData:user[index%srcsCount]},
-                {img:input[index],frameData:self[index%srcsCount]},
+                {img:input[index],frameData:user[index%srcsCount]},
+                {img:input2,frameData:self[index%srcsCount]},
             ]
             index++;
             const composed = await tools.gifTools.compose(src,join)
@@ -117,8 +117,8 @@ async function processGif(input1:Buffer,input2:Buffer):Promise<Buffer|void> {
         for(const src of target) {
             const curIndex = index%srcsCount
             const join:ComposeJoin[] = [
-                {img:input1,frameData:user[curIndex]},
-                {img:input[index],frameData:self[curIndex]},
+                {img:input[index],frameData:user[curIndex]},
+                {img:input1,frameData:self[curIndex]},
             ]
             index++
             const composed = await tools.gifTools.compose(src,join)
