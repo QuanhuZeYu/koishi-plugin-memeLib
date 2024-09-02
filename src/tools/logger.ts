@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from "path";
 import * as yaml from 'js-yaml'
-import { MY_PLUGIN_DIR } from "..";
+import { MY_PLUGIN_DIR } from "../interface/BASE_DATA";
 
 
 interface Config {

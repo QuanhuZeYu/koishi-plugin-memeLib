@@ -3,9 +3,9 @@ import fs from 'fs/promises'; // 使用 Promises API 以便使用 async/await
 import sharp from "sharp";
 import * as _canvagif from '@canvacord/gif'
 
-import { ComposeJoin, FrameData } from "../../interface/FrameData";
+import { ComposeJoin, FrameData } from "../../interface/InterfaceData";
 import  tools  from "../../tools/_index";
-import { createFrameOption } from "../../interface/FrameData";
+import { createFrameOption } from "../../interface/InterfaceData";
 
 const logger = tools.logger
 
