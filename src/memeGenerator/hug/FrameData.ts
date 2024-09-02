@@ -3,7 +3,7 @@ import { ComposeJoin, FrameData } from "../../interface/InterfaceData"
 import fs from 'fs/promises'
 import timeIt from "../../tools/decorator/timmer"
 import tools from "../../tools/_index"
-import { Base_GifQuality, MY_PLUGIN_DIR } from "src/interface/BASE_DATA"
+import { Base_GifQuality, MY_PLUGIN_DIR } from "../../interface/BASE_DATA"
 
 const logger = tools.logger
 
