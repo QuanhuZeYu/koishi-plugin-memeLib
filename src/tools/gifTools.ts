@@ -65,48 +65,76 @@ async function extraGIF(gifBuffer: Buffer) {
 /**
  * 对齐方式为倍化目标，抽帧输入，两种方式同时进行
  * 返回已经对齐的两个数组，并附带一个目标GIF循环次数统计
+ * 1.如果输入帧过小，倍化输入帧，不进行对齐，直到大于等于目标帧数，不记录倍化的次数
+ * 2.如果目标帧过小，倍化目标帧，不进行对齐，直到大于等于输入帧数，并且记录倍化次数
+ * 3.对输入帧进行抽帧，直到与目标帧数一致，抽帧方式为保留头尾帧，然后通过二分法均匀抽取
  * @param target 
  * @param input 
  * @returns [Buffer[],Buffer[],number] 第一个参数是目标帧数组，第二个参数是输入帧数组，第三个是目标帧循环次数
  */
 async function align2Gif(target: Buffer | Buffer[], input: Buffer): Promise<[Buffer[], Buffer[], number]> {
-    const targets: Buffer[] = Array.isArray(target) ? target : await extraGIF(target);
-    let inputs: Buffer[] = await extraGIF(input);
+    // 处理target的两种输入情况，提取目标 GIF 的 png 序列
+    let targets: Buffer[];
+    if (Array.isArray(target)) {
+        targets = target;
+    } else {
+        targets = await extraGIF(target);
+    }
+    let inputs: Buffer[] = await extraGIF(input); // 提取输入 GIF 的 png 序列
 
     const targetFramesCount = targets.length;
     const inputFramesCount = inputs.length;
-    let rt: number = 1; // 倍数
 
-    // 如果输入帧数与目标帧数一致，直接返回
+    // 如果输入帧数已经与目标帧数一致，直接返回
     if (inputFramesCount === targetFramesCount) {
-        return [targets, inputs, rt];
+        return [targets, inputs, 1];
     }
 
-    // 处理输入帧比目标帧少的情况
+    // 如果输入帧过小，需要倍化输入帧
     if (inputFramesCount < targetFramesCount) {
         const multiplier = Math.ceil(targetFramesCount / inputFramesCount);
         inputs = Array.from({ length: targetFramesCount }, (_, i) => inputs[i % inputFramesCount]);
-    } else {
-        // 处理输入帧比目标帧多的情况
-        rt = Math.ceil(inputFramesCount / targetFramesCount);
-        const alignedTargets: Buffer[] = Array.from({ length: inputFramesCount }, (_, i) => targets[i % targetFramesCount]);
-
-        let framesToRemove = inputFramesCount - targetFramesCount;
-        let keepIndices = new Set<number>([0, inputFramesCount - 1]); // 保留头尾两帧
-
-        // 使用二分法进行帧抽取
-        for (let left = 1, right = inputFramesCount - 2; framesToRemove > 0 && left <= right;) {
-            const middle = Math.floor((left + right) / 2);
-            if (!keepIndices.has(middle)) {
-                keepIndices.add(middle);
-                framesToRemove--;
-            }
-            (keepIndices.size % 2 === 0) ? right-- : left++;
-        }
-
-        inputs = Array.from(keepIndices).sort((a, b) => a - b).map(i => inputs[i]);
     }
 
+    // 如果目标帧数较小，需要倍化目标帧
+    let rt = 1; // 倍数，只有目标帧数较小时，才需要倍化
+    if (targetFramesCount < inputs.length) {
+        rt = Math.ceil(inputs.length / targetFramesCount);
+        targets = Array.from({ length: rt * targetFramesCount }, (_, i) => targets[i % targetFramesCount]);
+        targets = targets.slice(0, inputs.length); // 修正长度以匹配输入帧数
+    }
+
+    // 进行抽帧，如果输入帧数比目标帧数多
+    if (inputs.length > targets.length) {
+        const alignedInputs: Buffer[] = [inputs[0], inputs[inputs.length - 1]]; // 保留头和尾的帧
+
+        let framesToRemove = inputs.length - targets.length;
+        let left = 1; // 从第二帧开始（已经保留了第一帧）
+        let right = inputs.length - 2; // 到倒数第二帧结束（已经保留了最后一帧）
+
+        // 使用二分法来抽取中间的帧
+        while (framesToRemove > 0 && left <= right) {
+            const middle = Math.floor((left + right) / 2);
+            if (!alignedInputs.includes(inputs[middle])) {
+                alignedInputs.push(inputs[middle]);
+                framesToRemove--;
+            }
+
+            if (framesToRemove > 0) {
+                if (alignedInputs.length % 2 === 0) {
+                    right--; // 从右侧移除
+                } else {
+                    left++; // 从左侧移除
+                }
+            }
+        }
+
+        // 按原顺序排序抽取的帧
+        alignedInputs.sort((a, b) => inputs.indexOf(a) - inputs.indexOf(b));
+        inputs = alignedInputs;
+    }
+
+    // 最终保证两者帧数一致
     return [targets, inputs, rt];
 }
 

@@ -210,7 +210,7 @@ const execAsync = promisify(exec);
 // 测试hammer
 async function test() {
     const imgPath = path.resolve(MY_PLUGIN_DIR,'../tmp/test.jpg')
-    const gifPath = path.resolve(MY_PLUGIN_DIR,'../tmp/gif1.gif')
+    const gifPath = path.resolve(MY_PLUGIN_DIR,'../tmp/gif2.gif')
     const outPath1 = path.resolve(MY_PLUGIN_DIR,'../out/hammer1.gif')
     const outPath2 = path.resolve(MY_PLUGIN_DIR,'../out/hammer2.gif')
     const inImg = await tools.imageTools.loadImageFPath(imgPath)
