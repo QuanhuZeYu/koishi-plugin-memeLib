@@ -9,7 +9,7 @@ import { MemeGenerator } from "../src";
 import sharp from "sharp";
 import logger, { readConfig } from "./tools/logger";
 import { hugFrameData } from "./memeGenerator/hug/FrameData";
-import { BASE_DATA } from "./interface/BASE_DATA";
+import { BASE_DATA, MY_PLUGIN_DIR } from "./interface/BASE_DATA";
 
 const execAsync = promisify(exec);
 
@@ -127,51 +127,67 @@ const execAsync = promisify(exec);
 //     }
 // }
 
+
 // 测试hug
-import { loadImg as hugLoad } from "./memeGenerator/hug/FrameData";
-import { ComposeJoin } from "./interface/InterfaceData";
-import { Base_GifQuality, MY_PLUGIN_DIR } from "./interface/BASE_DATA";
-async function test() { 
-    const result = []
-    const savePath = path.resolve(MY_PLUGIN_DIR,'../out')
-    const loadImg = tools.imageTools.loadImageFPath
-    const srcs = await hugLoad()
-    const input1 = await loadImg(path.resolve(MY_PLUGIN_DIR,'../tmp/test.jpg'))
-    const frameData1 = hugFrameData.user
-    const input2 = await loadImg(path.resolve(MY_PLUGIN_DIR,'../tmp/test2.jpg'))
-    const frameData2 = hugFrameData.self
-    // 循环底图帧数次
-    for (const [index, src] of srcs.entries()) {
-        // 拼接数据
-        const join:ComposeJoin[] = [
-            {img:input1, frameData:frameData1[index]},
-            {img:input2, frameData:frameData2[index]}
-        ]
-        const composed = await tools.gifTools.compose(src,join)
-        result.push(composed)
-    }
-    // 将png序列转换成GIF
-    const heighQ = BASE_DATA.gifQuality.heigh
-    const lowQ = BASE_DATA.gifQuality.low
-    const vlowQ = BASE_DATA.gifQuality.veryLow
-    const gif1 = await tools.gifTools.pngsToGifBuffer_ffmpeg(result)
-    const gif2 = await tools.gifTools.pngsToGifBuffer_ffmpeg(result,10)
-    const gif3 = await tools.gifTools.pngsToGifBuffer_ffmpeg(result,undefined,heighQ)
-    const gif4 = await tools.gifTools.pngsToGifBuffer_ffmpeg(result,undefined,lowQ)
-    const gif5 = await tools.gifTools.pngsToGifBuffer_ffmpeg(result,undefined,vlowQ)
-    logger.info(`gif1大小:${gif1.byteLength}`)
-    logger.info(`gif2大小:${gif2.byteLength}`)
-    logger.info(`gif3大小:${gif3.byteLength}`)
-    logger.info(`gif4大小:${gif4.byteLength}`)
-    logger.info(`gif5大小:${gif5.byteLength}`)
-    // 保存该GIF
-    await tools.gifTools.saveGifToFile(gif1,path.resolve(savePath,'huggif1.gif'))
-    await tools.gifTools.saveGifToFile(gif2,path.resolve(savePath,'huggif2.gif'))
-    await tools.gifTools.saveGifToFile(gif3,path.resolve(savePath,'huggif3.gif'))
-    await tools.gifTools.saveGifToFile(gif4,path.resolve(savePath,'huggif4.gif'))
-    await tools.gifTools.saveGifToFile(gif5,path.resolve(savePath,'huggif5.gif'))
+// import { loadImg as hugLoad } from "./memeGenerator/hug/FrameData";
+// import { ComposeJoin } from "./interface/InterfaceData";
+// import { Base_GifQuality, MY_PLUGIN_DIR } from "./interface/BASE_DATA";
+// async function test() { 
+//     const result = []
+//     const savePath = path.resolve(MY_PLUGIN_DIR,'../out')
+//     const loadImg = tools.imageTools.loadImageFPath
+//     const srcs = await hugLoad()
+//     const input1 = await loadImg(path.resolve(MY_PLUGIN_DIR,'../tmp/test.jpg'))
+//     const frameData1 = hugFrameData.user
+//     const input2 = await loadImg(path.resolve(MY_PLUGIN_DIR,'../tmp/test2.jpg'))
+//     const frameData2 = hugFrameData.self
+//     // 循环底图帧数次
+//     for (const [index, src] of srcs.entries()) {
+//         // 拼接数据
+//         const join:ComposeJoin[] = [
+//             {img:input1, frameData:frameData1[index]},
+//             {img:input2, frameData:frameData2[index]}
+//         ]
+//         const composed = await tools.gifTools.compose(src,join)
+//         result.push(composed)
+//     }
+//     // 将png序列转换成GIF
+//     const heighQ = BASE_DATA.gifQuality.heigh
+//     const lowQ = BASE_DATA.gifQuality.low
+//     const vlowQ = BASE_DATA.gifQuality.veryLow
+//     const gif1 = await tools.gifTools.pngsToGifBuffer_ffmpeg(result)
+//     const gif2 = await tools.gifTools.pngsToGifBuffer_ffmpeg(result,10)
+//     const gif3 = await tools.gifTools.pngsToGifBuffer_ffmpeg(result,undefined,heighQ)
+//     const gif4 = await tools.gifTools.pngsToGifBuffer_ffmpeg(result,undefined,lowQ)
+//     const gif5 = await tools.gifTools.pngsToGifBuffer_ffmpeg(result,undefined,vlowQ)
+//     logger.info(`gif1大小:${gif1.byteLength}`)
+//     logger.info(`gif2大小:${gif2.byteLength}`)
+//     logger.info(`gif3大小:${gif3.byteLength}`)
+//     logger.info(`gif4大小:${gif4.byteLength}`)
+//     logger.info(`gif5大小:${gif5.byteLength}`)
+//     // 保存该GIF
+//     await tools.gifTools.saveGifToFile(gif1,path.resolve(savePath,'huggif1.gif'))
+//     await tools.gifTools.saveGifToFile(gif2,path.resolve(savePath,'huggif2.gif'))
+//     await tools.gifTools.saveGifToFile(gif3,path.resolve(savePath,'huggif3.gif'))
+//     await tools.gifTools.saveGifToFile(gif4,path.resolve(savePath,'huggif4.gif'))
+//     await tools.gifTools.saveGifToFile(gif5,path.resolve(savePath,'huggif5.gif'))
+//     return
+// }
+
+
+// hug GIF参数测试
+async function test() {
+    const loadGif = tools.imageTools.loadImageFPath
+    const savePath = path.resolve(MY_PLUGIN_DIR,'../out/huggif.gif')
+    const gif1Path = path.resolve(MY_PLUGIN_DIR,'../tmp/gif1.gif')
+    const gif2Path = path.resolve(MY_PLUGIN_DIR,'../tmp/gif2.gif')
+    const gif1 = await loadGif(gif1Path)
+    const gif2 = await loadGif(gif2Path)
+    const result = await MemeGenerator.hug(gif1,gif2)
+    await tools.gifTools.saveGifToFile(result,savePath)
     return
 }
+
 
 // 测试正则
 // async function test() {

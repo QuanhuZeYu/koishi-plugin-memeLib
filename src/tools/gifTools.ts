@@ -141,7 +141,13 @@ async function align2Gif(target: Buffer|Buffer[], input: Buffer):Promise<[Buffer
     return [targets,inputs,rt]
 }
 
-
+/**
+ * 
+ * @param target1 
+ * @param target2 
+ * @param input 
+ * @returns 
+ */
 async function align3Gif(
     target1: Buffer | Buffer[],
     target2: Buffer | Buffer[],
@@ -343,8 +349,8 @@ async function compose(src: Buffer, join: ComposeJoin[]): Promise<Buffer> {
 
 
 const gifTools = { 
-    saveGifToFile,extraGIF,align2Gif,pngsToGifBuffer_canvas,pngsToGifBuffer_ffmpeg,
-    compose
+    saveGifToFile,extraGIF,align2Gif,align3Gif,
+    pngsToGifBuffer_canvas,pngsToGifBuffer_ffmpeg,compose
 }
 
 export default gifTools
