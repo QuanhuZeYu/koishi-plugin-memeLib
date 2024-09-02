@@ -20,6 +20,34 @@ async function loadImageFPath(absPath: string): Promise<Buffer> {
 }
 
 /**
+ * 从目录中读取所有 PNG 图片，返回 Buffer 数组
+ * 返回的数组按照文件读取顺序排列
+ * @param dirPath 目录路径
+ * @returns Promise<Buffer[]> 图片的 Buffer 数组
+ */
+async function loadImagesFromDir(dirPath: string): Promise<Buffer[]> {
+    try {
+        // 读取目录中的所有文件名
+        const files: string[] = await fs.readdir(dirPath);
+
+        // 过滤出所有 .png 文件
+        const pngFiles: string[] = files.filter(file => file.toLowerCase().endsWith('.png'));
+
+        // 读取每个 PNG 文件并转换为 Buffer
+        const buffers: Buffer[] = await Promise.all(
+            pngFiles.map(async (file) => {
+                const filePath = path.resolve(dirPath, file);
+                return await fs.readFile(filePath);
+            })
+        );
+
+        return buffers;
+    } catch (error:any) {
+        throw new Error(`Error reading images from directory: ${dirPath}, Error: ${error.message}`);
+    }
+}
+
+/**
  * 异步函数：将图像缓冲区的数据保存为指定文件名的文件
  * @param imgBuf 图像数据的缓冲区对象，通常来自图像处理或转换操作
  * @param fileName 要保存的文件名，包括路径和文件扩展名；即完整路径
@@ -161,7 +189,10 @@ async function align3imgSize(target:Buffer,input1:Buffer,input2:Buffer):Promise<
 }
 
 
-const imageTools = {cropToCircle, loadImageFPath, saveImageFBuffer, isPng, isGif, isJpg,
+const imageTools = {
+    cropToCircle, 
+    loadImageFPath, loadImagesFromDir, saveImageFBuffer,
+    isPng, isGif, isJpg,
     align2imgSize,align3imgSize
 }
 

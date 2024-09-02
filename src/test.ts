@@ -176,17 +176,17 @@ const execAsync = promisify(exec);
 
 
 // hug GIF参数测试
-async function test() {
-    const loadGif = tools.imageTools.loadImageFPath
-    const savePath = path.resolve(MY_PLUGIN_DIR,'../out/huggif.gif')
-    const gif1Path = path.resolve(MY_PLUGIN_DIR,'../tmp/gif1.gif')
-    const gif2Path = path.resolve(MY_PLUGIN_DIR,'../tmp/gif2.gif')
-    const gif1 = await loadGif(gif1Path)
-    const gif2 = await loadGif(gif2Path)
-    const result = await MemeGenerator.hug(gif1,gif2)
-    await tools.gifTools.saveGifToFile(result,savePath)
-    return
-}
+// async function test() {
+//     const loadGif = tools.imageTools.loadImageFPath
+//     const savePath = path.resolve(MY_PLUGIN_DIR,'../out/huggif.gif')
+//     const gif1Path = path.resolve(MY_PLUGIN_DIR,'../tmp/gif1.gif')
+//     const gif2Path = path.resolve(MY_PLUGIN_DIR,'../tmp/gif2.gif')
+//     const gif1 = await loadGif(gif1Path)
+//     const gif2 = await loadGif(gif2Path)
+//     const result = await MemeGenerator.hug(gif1,gif2)
+//     await tools.gifTools.saveGifToFile(result,savePath)
+//     return
+// }
 
 
 // 测试正则
@@ -205,6 +205,21 @@ async function test() {
 
 //     logger.info(result); // 输出: ['div', 'p', 'span']
 // }
+
+
+// 测试hammer
+async function test() {
+    const imgPath = path.resolve(MY_PLUGIN_DIR,'../tmp/test.jpg')
+    const gifPath = path.resolve(MY_PLUGIN_DIR,'../tmp/gif1.gif')
+    const outPath1 = path.resolve(MY_PLUGIN_DIR,'../out/hammer1.gif')
+    const outPath2 = path.resolve(MY_PLUGIN_DIR,'../out/hammer2.gif')
+    const inImg = await tools.imageTools.loadImageFPath(imgPath)
+    const inGif = await tools.imageTools.loadImageFPath(gifPath)
+    const result1 = await MemeGenerator.hammer(inImg)
+    const result2 = await MemeGenerator.hammer(inGif)
+    await tools.gifTools.saveGifToFile(result1,outPath1)
+    await tools.gifTools.saveGifToFile(result2,outPath2)
+}
 
 
 test()
