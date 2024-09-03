@@ -1,8 +1,10 @@
 import { Context, Schema } from 'koishi'
 
 import type { SharpService } from "@quanhuzeyu/koishi-plugin-qhzy-sharp"
+import path from 'path'
 
 export const name = 'memelib'
+export const baseDir = path.resolve(__dirname)
 export const inject = {
 	required: ['QhzySharp']
 }
