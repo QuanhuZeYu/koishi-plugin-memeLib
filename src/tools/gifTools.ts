@@ -3,7 +3,6 @@ import path from "node:path";
 import * as _canvaGif from "@canvacord/gif";
 import  logger  from "../tools/logger";
 import GIFEncoder from 'gifencoder';
-import { Canvas, createCanvas, loadImage } from 'canvas';
 import { BASE_DATA, Base_GifQuality } from '../interface/BASE_DATA';
 import { Readable, Stream } from 'node:stream';
 import  concat  from 'concat-stream'
@@ -236,43 +235,6 @@ async function align3Gif(
 }
 
 
-async function pngsToGifBuffer_canvas(pngBuffers: Buffer[], gifData: { gifWidth: number, gifHeigh: number }, fps?: number): Promise<Buffer> {
-    fps = fps ? fps : BASE_DATA.baseFps;
-    const delay = Math.round(1000 / fps);
-    const encoder = new GIFEncoder(gifData.gifWidth, gifData.gifHeigh);
-    const canvas = createCanvas(gifData.gifWidth, gifData.gifHeigh);
-    const ctx = canvas.getContext('2d');
-
-    return new Promise((resolve, reject) => {
-        encoder.start();
-        encoder.setRepeat(0); // 0 为无限循环
-        encoder.setDelay(delay); // 每帧之间的延迟（毫秒）
-        encoder.setQuality(1); // 设置 GIF 的质量（1-30，1 最高）
-        encoder.setTransparent(0x00FF00FF); // 设置透明背景的颜色（这里使用了一个透明的颜色）
-
-        const gifStream = encoder.createReadStream();
-        gifStream.pipe(concat({ encoding: 'buffer' }, resolve));
-
-        (async () => {
-            try {
-                for (const buffer of pngBuffers) {
-                    const img = await loadImage(buffer);
-                    
-                    // 在绘制每一帧之前清空画布
-                    ctx.clearRect(0, 0, gifData.gifWidth, gifData.gifHeigh);
-
-                    ctx.drawImage(img, 0, 0, gifData.gifWidth, gifData.gifHeigh);
-                    encoder.addFrame(ctx as any);
-                }
-                encoder.finish();
-            } catch (error) {
-                reject(error);
-            }
-        })();
-    });
-}
-
-
 async function pngsToGifBuffer_ffmpeg(pngBuffers:Buffer[],fps?:number,quality?:GifQuality):Promise<Buffer> {
     const petFps = fps || BASE_DATA.baseFps;
     const max_colors = quality?.color || Base_GifQuality.medium.color
@@ -349,7 +311,7 @@ async function compose(src: Buffer, join: ComposeJoin[]): Promise<Buffer> {
 
 const gifTools = { 
     saveGifToFile,extraGIF,align2Gif,align3Gif,
-    pngsToGifBuffer_canvas,pngsToGifBuffer_ffmpeg,compose
+    pngsToGifBuffer_ffmpeg,compose
 }
 
 export default gifTools
