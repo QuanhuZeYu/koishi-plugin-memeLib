@@ -18,5 +18,8 @@
   "devDependencies": {},
   "peerDependencies": {
     "koishi": "^4.17.11"
+  },
+  "dependencies": {
+    "@quanhuzeyu/koishi-plugin-qhzy-sharp": "^1.0.0"
   }
 }
