@@ -1,10 +1,11 @@
 import fs from 'node:fs'
 import path from "node:path";
-import * as _canvaGif from "@canvacord/gif";
+import * as gifuct from 'gifuct-js'
+import { PNG } from 'pngjs';
+import gifJs from 'gif.js'
 import  logger  from "../tools/logger";
-import GIFEncoder from 'gifencoder';
 import { BASE_DATA, Base_GifQuality } from '../interface/BASE_DATA';
-import { Readable, Stream } from 'node:stream';
+import { PassThrough, Readable, Stream } from 'node:stream';
 import  concat  from 'concat-stream'
 import Ffmpeg from 'fluent-ffmpeg';
 import { ComposeJoin, createFrameOption, FrameData, GifQuality } from '../interface/InterfaceData';
@@ -44,21 +45,62 @@ async function saveGifToFile(gifBuffer: Buffer, outputPath: string): Promise<voi
     }
 }
 
-async function extraGIF(gifBuffer: Buffer) {
-    // 将 ReadableStream 转换为 Buffer 的辅助函数
-    const streamToBuffer = _canvaGif.streamToBuffer
-    const Decoder = _canvaGif.Decoder
-    const decoder = new Decoder(gifBuffer);
-    const rawFrames = decoder.decode();
-    // 读取每一帧
-    const frames = decoder.toPNG(rawFrames)
-    const promiseBufs:Promise<Buffer>[] = []
-    frames.forEach((frame,i)=>{
-        const buf = streamToBuffer(frame)
-        promiseBufs.push(buf)
-    })
-    logger.info(`共提取${frames.length}帧`)
-    return Promise.all(promiseBufs)
+async function extraGIF(gifBuffer: Buffer):Promise<Buffer[]> {
+    // 从 GIF 文件或 Buffer 提取帧
+    async function extractFramesFromGif(gifBuffer: Buffer): Promise<gifuct.ParsedFrame[]> {
+        // 解析 GIF 数据
+        const parsedGif = gifuct.parseGIF(gifBuffer);
+
+        // 解压缩帧，包含每一帧的图像数据
+        const frames = gifuct.decompressFrames(parsedGif, true);
+
+        return frames;
+    }
+    async function convFrame2Buffer(frame: gifuct.ParsedFrame): Promise<Buffer> {
+        const { width, height, top, left } = frame.dims;
+
+        // 创建一个完整尺寸的 PNG 实例（用于整个 GIF 的画布）
+        const png = new PNG({ width, height });
+
+        // 初始化 PNG 数据为透明
+        png.data.fill(0);
+
+        // 使用 frame.patch (RGBA 数据) 填充 PNG 数据
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                // 计算 patch 中的像素索引
+                const patchIndex = (y * width + x) * 4; // patch 的数据是每个像素占 4 个字节 (RGBA)
+
+                // 计算在 PNG 数据中的偏移位置，注意偏移量 (top, left)
+                const pngIndex = ((y + top) * png.width + (x + left)) * 4; 
+
+                // 填充像素数据
+                if (patchIndex < frame.patch.length) {
+                    png.data[pngIndex] = frame.patch[patchIndex];     // 红色通道
+                    png.data[pngIndex + 1] = frame.patch[patchIndex + 1]; // 绿色通道
+                    png.data[pngIndex + 2] = frame.patch[patchIndex + 2]; // 蓝色通道
+                    png.data[pngIndex + 3] = frame.patch[patchIndex + 3]; // 透明度通道
+                }
+            }
+        }
+
+        // 打包 PNG 数据
+        return new Promise<Buffer>((resolve, reject) => {
+            const chunks: Buffer[] = [];
+            png.pack()
+                .on('data', (chunk: Buffer) => chunks.push(chunk))
+                .on('end', () => resolve(Buffer.concat(chunks)))
+                .on('error', reject);
+        });
+    }
+    const frames = await extractFramesFromGif(gifBuffer);
+    console.log(`共提取 ${frames.length} 帧.`);
+    const pngs = []
+    for(const frame of frames) {
+        const png = await convFrame2Buffer(frame)
+        pngs.push(png)
+    }
+    return pngs
 }
 
 
