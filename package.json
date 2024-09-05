@@ -1,9 +1,10 @@
 {
   "name": "@quanhuzeyu/koishi-plugin-memelib",
   "description": "memelib插件版",
-  "version": "0.1.8",
+  "version": "0.1.11",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
+  "private": false,
   "files": [
     "lib",
     "dist"
@@ -33,6 +34,7 @@
     "pngjs": "^7.0.0"
   },
   "devDependencies": {
+    "@quanhuzeyu/koishi-plugin-qhzy-sharp": "^1.0.0",
     "@types/concat-stream": "^2.0.3",
     "@types/gif.js": "^0.2.5",
     "@types/pngjs": "^6.0.5"

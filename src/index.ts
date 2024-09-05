@@ -36,13 +36,13 @@ export function apply(ctx: Context) {
 }
 
 declare module 'koishi' {
-	interface Tables {
+	interface Context {
 		memelib: MemeLib
 	}
 }
 
 export class MemeLib extends Service {
-	static memelib: typeof MemeGenerator
+	memelib: typeof MemeGenerator
 
 	constructor(ctx: Context, config:Config) {
 		super(ctx, 'memelib')
@@ -51,7 +51,7 @@ export class MemeLib extends Service {
 		}
 		setLogger(this.ctx.logger)
 		setSharp(ctx.QhzySharp.Sharp)
-		MemeLib.memelib = MemeGenerator
+		this.memelib = MemeGenerator
 		const logger = getLogger()
 		logger.info('memelib loaded')
 	}
