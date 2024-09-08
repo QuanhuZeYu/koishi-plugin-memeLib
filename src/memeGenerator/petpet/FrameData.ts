@@ -43,9 +43,6 @@ export const createFrame = timeIt(
     input: Buffer,
     hand: Buffer,
     frameData: FrameData,
-    option: createFrameOption = {
-        blend: 'dest-over',
-    }
 ) {
     // 输入验证
     if (!Buffer.isBuffer(input) || !Buffer.isBuffer(hand)) {
@@ -197,7 +194,7 @@ const processGifImage = timeIt(async function processGifImage(inputImg: Buffer):
     const _frameBuffers = await Promise.all(
         _hands.map(async(hand,index)=>{
             const handIndex = index % _handCount
-            return createFrame(_inputs[index],hand,_frameData[handIndex],undefined)
+            return createFrame(_inputs[index],hand,_frameData[handIndex])
         })
     )
     return _frameBuffers
