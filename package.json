@@ -12,6 +12,7 @@
   "license": "MIT",
   "scripts": {
     "build": "node build.js",
+    "clean": "node clean.js",
     "allpub": "npm run build && npm run pubgit && npm run pubnpm",
     "pubgit": "npm publish --registry=https://npm.pkg.github.com --access=public",
     "pubnpm": "npm publish --registry=https://registry.npmjs.org --access=public"
