@@ -1,4 +1,3 @@
-
 export interface FrameData {
     x?: number
     y?: number
@@ -6,6 +5,7 @@ export interface FrameData {
     height?: number
     rotate?: number
     blendOption?:createFrameOption
+    opacity?: number
 }
 
 export interface ComposeJoin{
@@ -13,8 +13,7 @@ export interface ComposeJoin{
     frameData:FrameData
 }
 
-export interface createFrameOption {
-    blend:
+export type createFrameOption =
         | "clear"
         | "source"
         | "over"
@@ -42,7 +41,6 @@ export interface createFrameOption {
         | "soft-light"
         | "difference"
         | "exclusion";
-}
 
 export interface GifQuality {
     color:number,
