@@ -1,6 +1,6 @@
 import path from "path"
 import tools from "../../tools/_index"
-import { getSharp } from "../../context"
+import { getSharp } from "../../Data/context"
 import { ComposeJoin } from "../../interface/InterfaceData"
 
 async function distracted(imgBuf:Buffer) {

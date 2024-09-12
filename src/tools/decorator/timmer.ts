@@ -1,4 +1,6 @@
+import { getLogger } from "../../Data/context";
 import logger from "../logger";
+
 
 // 定义一个泛型类型用于处理异步函数
 type AsyncFunction<T extends (...args: any[]) => any> = ReturnType<T> extends Promise<any> ? T : T;

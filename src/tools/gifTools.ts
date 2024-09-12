@@ -9,7 +9,8 @@ import { PassThrough, Readable, Stream } from 'node:stream';
 import  concat  from 'concat-stream'
 import Ffmpeg from 'fluent-ffmpeg';
 import { ComposeJoin, createFrameOption, FrameData, GifQuality } from '../interface/InterfaceData';
-import { getSharp } from '../context';
+import { getSharp } from '../Data/context';
+import timeIt from './decorator/timmer';
 
 // import gifFrames from 'gif-frames';
 
@@ -45,63 +46,25 @@ async function saveGifToFile(gifBuffer: Buffer, outputPath: string): Promise<voi
     }
 }
 
-async function extraGIF(gifBuffer: Buffer):Promise<Buffer[]> {
-    // 从 GIF 文件或 Buffer 提取帧
-    async function extractFramesFromGif(gifBuffer: Buffer): Promise<gifuct.ParsedFrame[]> {
-        // 解析 GIF 数据
-        const parsedGif = gifuct.parseGIF(gifBuffer);
-
-        // 解压缩帧，包含每一帧的图像数据
-        const frames = gifuct.decompressFrames(parsedGif, true);
-
-        return frames;
-    }
-    async function convFrame2Buffer(frame: gifuct.ParsedFrame): Promise<Buffer> {
-        const { width, height, top, left } = frame.dims;
-
-        // 创建一个完整尺寸的 PNG 实例（用于整个 GIF 的画布）
-        const png = new PNG({ width, height });
-
-        // 初始化 PNG 数据为透明
-        png.data.fill(0);
-
-        // 使用 frame.patch (RGBA 数据) 填充 PNG 数据
-        for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-                // 计算 patch 中的像素索引
-                const patchIndex = (y * width + x) * 4; // patch 的数据是每个像素占 4 个字节 (RGBA)
-
-                // 计算在 PNG 数据中的偏移位置，注意偏移量 (top, left)
-                const pngIndex = ((y + top) * png.width + (x + left)) * 4; 
-
-                // 填充像素数据
-                if (patchIndex < frame.patch.length) {
-                    png.data[pngIndex] = frame.patch[patchIndex];     // 红色通道
-                    png.data[pngIndex + 1] = frame.patch[patchIndex + 1]; // 绿色通道
-                    png.data[pngIndex + 2] = frame.patch[patchIndex + 2]; // 蓝色通道
-                    png.data[pngIndex + 3] = frame.patch[patchIndex + 3]; // 透明度通道
-                }
+const extraGIF = timeIt(async function extraGIF(gifbuffer:Buffer):Promise<Buffer[]> {
+    const sharp = getSharp()
+    const pngs:Buffer[] = []
+    await sharp(gifbuffer)
+        .metadata()
+        .then(async (metadata) => {
+            if (!metadata.pages || metadata.pages === 0) {
+                throw new Error('GIF数据中无帧数据');
             }
-        }
-
-        // 打包 PNG 数据
-        return new Promise<Buffer>((resolve, reject) => {
-            const chunks: Buffer[] = [];
-            png.pack()
-                .on('data', (chunk: Buffer) => chunks.push(chunk))
-                .on('end', () => resolve(Buffer.concat(chunks)))
-                .on('error', reject);
-        });
-    }
-    const frames = await extractFramesFromGif(gifBuffer);
-    console.log(`共提取 ${frames.length} 帧.`);
-    const pngs = []
-    for(const frame of frames) {
-        const png = await convFrame2Buffer(frame)
-        pngs.push(png)
-    }
-    return pngs
-}
+            for(let i = 0; i < metadata.pages; i++) {
+                const frame = await sharp(gifbuffer, {page: i}).png().toBuffer()
+                pngs.push(frame)
+            }
+            logger.info(`共提取 ${pngs.length} 帧.`)
+        }).catch((err)=> {
+            logger.error('处理 GIF 时发生错误:', err.message)
+        })
+    return await pngs
+})
 
 
 /**

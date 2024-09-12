@@ -1,7 +1,5 @@
 import { Context } from "koishi";
-
-import {} from "@quanhuzeyu/koishi-plugin-qhzy-sharp"
-import type _sharp from "@quanhuzeyu/sharp-for-koishi"
+import type _sharp from 'sharp'
 
 let logger:any
 let sharp: typeof _sharp

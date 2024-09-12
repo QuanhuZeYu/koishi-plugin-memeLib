@@ -1,6 +1,6 @@
 import path from "node:path";
 import fs from 'fs/promises'; // 使用 Promises API 以便使用 async/await
-import { getSharp } from "../../context";
+import { getSharp } from "../../Data/context";
 
 import { ComposeJoin, FrameData } from "../../interface/InterfaceData";
 import  tools  from "../../tools/_index";
