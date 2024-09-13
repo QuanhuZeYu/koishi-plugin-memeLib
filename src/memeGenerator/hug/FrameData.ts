@@ -149,26 +149,8 @@ async function processGif(input1:Buffer,input2:Buffer):Promise<Buffer|void> {
 
 export const loadImg = timeIt(async function loadImg() {
     const imagePath = path.resolve(__dirname, 'images');
-    const images = await fs.readdir(imagePath); // 读取目录中的文件
-
-    // 创建一个与文件名相同长度的数组，用于存储图像缓冲区
-    const pngBuffers: Buffer[] = new Array(images.length);
-
-    // 使用 Promise.all 并行读取图像，并保留索引顺序
-    await Promise.all(
-        images.map(async (fileName, index) => {
-            if (fileName.endsWith('.png')) {
-                const img = path.resolve(imagePath, fileName);
-                const imgBuffer = await fs.readFile(img); // 读取文件
-
-                // 使用索引保存缓冲区
-                pngBuffers[index] = imgBuffer;
-            }
-        })
-    );
-
-    // 过滤掉任何未定义的元素（非 PNG 文件）
-    return pngBuffers.filter(buffer => buffer !== undefined);
+    const images = await tools.imageTools.loadAllImageFPath(imagePath)
+    return images
 })
 
 export default craftHug

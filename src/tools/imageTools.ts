@@ -4,7 +4,23 @@ import  tools  from './_index';
 import path from 'node:path';
 import logger from './logger';
 import { ComposeJoin } from '../interface/InterfaceData';
+import type { Color } from 'sharp';
 
+
+async function loadAllImageFPath(dirPath: string) {
+    const files = await fs.readdir(dirPath)
+    const pngs:Buffer[] = []
+    await Promise.all(
+        files.map(async (fileName,index) => {
+            if(fileName.endsWith('.png')) {
+                const img = path.resolve(dirPath, fileName);
+                const imgBuffer = await loadImageFPath(img);
+                pngs[index] = imgBuffer;
+            }
+        })
+    )
+    return pngs.filter(buffer => buffer !== undefined)
+}
 
 /**
  * 
@@ -212,11 +228,15 @@ async function compose(join:ComposeJoin[]) {
     const sharp = getSharp()
     // 按顺序将图像叠放 第一张图像大小设置为图像尺寸
     let curImg = join[0].img
-    const background = {background:{r:0,g:0,b:0,alpha:0}}
+    let background:Color = {r:0,g:0,b:0,alpha:0}
     // 将数组第一个元素剔除
     join.shift()
     for(const frame of join) {
         let img = frame.img
+        background = frame.frameData.resizeBackground ? frame.frameData.resizeBackground:background
+        if(frame.frameData.width && frame.frameData.height) {
+            img = await sharp(img).resize(frame.frameData.width,frame.frameData.height,{fit:'cover', background:background}).png().toBuffer()
+        }
         const frameData = frame.frameData
         curImg = await sharp(curImg)
             .composite([{
@@ -233,7 +253,7 @@ async function compose(join:ComposeJoin[]) {
 
 const imageTools = {
     cropToCircle, 
-    loadImageFPath, loadImagesFromDir, saveImageFBuffer,
+    loadAllImageFPath,loadImageFPath, loadImagesFromDir, saveImageFBuffer,
     isPng, isGif, isJpg,
     align2imgSize,align3imgSize,alignAtoB,
     compose

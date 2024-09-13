@@ -1,3 +1,5 @@
+import type { Color } from "sharp"
+
 export interface FrameData {
     x?: number
     y?: number
@@ -6,6 +8,7 @@ export interface FrameData {
     rotate?: number
     blendOption?:createFrameOption
     opacity?: number
+    resizeBackground?:Color
 }
 
 export interface ComposeJoin{
