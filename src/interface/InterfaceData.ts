@@ -1,4 +1,4 @@
-import type { Color } from "sharp"
+import type { Color, FitEnum } from "sharp"
 
 export interface FrameData {
     x?: number
@@ -9,6 +9,7 @@ export interface FrameData {
     blendOption?:createFrameOption
     opacity?: number
     resizeBackground?:Color
+    resizeFit?: keyof FitEnum
 }
 
 export interface ComposeJoin{

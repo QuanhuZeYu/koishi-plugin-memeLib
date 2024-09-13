@@ -8,18 +8,18 @@ import tools from "../../tools/_index";
 import fs from 'fs'
 
 export const baseFrameData:FrameData[] = [
-    {x:82,y:100,width:130,height:119},
-    {x:82,y:94,width:126,height:125},
-    {x:82,y:120,width:128,height:99},
-    {x:81,y:164,width:132,height:55},
-    {x:79,y:163,width:132,height:55},
-    {x:82,y:140,width:127,height:79},
-    {x:83,y:152,width:125,height:67},
-    {x:75,y:157,width:140,height:62},
-    {x:72,y:162,width:144,height:54},
-    {x:80,y:132,width:128,height:87},
-    {x:81,y:127,width:127,height:92},
-    {x:79,y:111,width:132,height:108},
+    {x:82,y:90,width:130,height:140},
+    {x:82,y:84,width:126,height:148},
+    {x:82,y:110,width:128,height:128},
+    {x:82,y:124,width:128,height:117},
+    {x:79,y:123,width:132,height:105},
+    {x:82,y:115,width:127,height:92},
+    {x:83,y:142,width:125,height:100},
+    {x:75,y:147,width:140,height:85},
+    {x:72,y:145,width:144,height:87},
+    {x:80,y:122,width:128,height:100},
+    {x:81,y:117,width:127,height:105},
+    {x:79,y:101,width:132,height:121},
 ]
 
 async function suck(imgBuf:Buffer):Promise<Buffer> {
@@ -38,7 +38,7 @@ async function processStatic(img:Buffer) {
         const frame = baseFrameData[i]
         const join:ComposeJoin[] = [
             {img:srcs[i], frameData:{}},
-            {img:img, frameData:{x:frame.x, y:frame.y, width:frame.width, height:frame.height,blendOption:"dest-over",resizeBackground:{r:255,g:255,b:255,alpha:0}}}
+            {img:img, frameData:{x:frame.x, y:frame.y, width:frame.width, height:frame.height,blendOption:"dest-over",resizeBackground:{r:255,g:255,b:255,alpha:0},resizeFit:"fill"}}
         ]
         const result_ = await tools.imageTools.compose(join)
         result.push(result_)
@@ -56,7 +56,7 @@ async function processGif(gif:Buffer) {
         const frame = baseFrameData[index]
         const join:ComposeJoin[] = [
             {img:src, frameData:{}},
-            {img:input2[i],frameData:{x:frame.x, y:frame.y, width:frame.width, height:frame.height,blendOption:"dest-over",resizeBackground:{r:255,g:255,b:255,alpha:0}}}
+            {img:input2[i],frameData:{x:frame.x, y:frame.y, width:frame.width, height:frame.height,blendOption:"dest-over",resizeBackground:{r:255,g:255,b:255,alpha:0},resizeFit:"fill"}}
         ]
         const result_ = await tools.imageTools.compose(join)
         result.push(result_)

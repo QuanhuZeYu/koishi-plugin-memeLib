@@ -4,7 +4,7 @@ import  tools  from './_index';
 import path from 'node:path';
 import logger from './logger';
 import { ComposeJoin } from '../interface/InterfaceData';
-import type { Color } from 'sharp';
+import type { Color, FitEnum } from 'sharp';
 
 
 async function loadAllImageFPath(dirPath: string) {
@@ -229,13 +229,15 @@ async function compose(join:ComposeJoin[]) {
     // 按顺序将图像叠放 第一张图像大小设置为图像尺寸
     let curImg = join[0].img
     let background:Color = {r:0,g:0,b:0,alpha:0}
+    let fit:keyof FitEnum = "contain"
     // 将数组第一个元素剔除
     join.shift()
     for(const frame of join) {
         let img = frame.img
+        fit = frame.frameData.resizeFit ? frame.frameData.resizeFit:fit
         background = frame.frameData.resizeBackground ? frame.frameData.resizeBackground:background
         if(frame.frameData.width && frame.frameData.height) {
-            img = await sharp(img).resize(frame.frameData.width,frame.frameData.height,{fit:'cover', background:background}).png().toBuffer()
+            img = await sharp(img).resize(frame.frameData.width,frame.frameData.height,{fit:fit, background:background}).png().toBuffer()
         }
         const frameData = frame.frameData
         curImg = await sharp(curImg)
