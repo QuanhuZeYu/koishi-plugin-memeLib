@@ -150,7 +150,7 @@ async function processGif(input1:Buffer,input2:Buffer):Promise<Buffer|void> {
 }
 
 export const loadImg = timeIt(async function loadImg() {
-    const imagePath = path.resolve(MY_PLUGIN_DIR, 'hug', 'images');
+    const imagePath = path.resolve(Data.baseData.memeGenDir, 'hug', 'images');
     const images = await tools.imageTools.loadAllImageFPath(imagePath)
     return images
 })
