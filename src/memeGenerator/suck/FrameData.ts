@@ -6,6 +6,7 @@ import path from "path";
 import { ComposeJoin, FrameData } from "../../interface/InterfaceData";
 import tools from "../../tools/_index";
 import fs from 'fs'
+import Data from '../../Data'
 
 export const baseFrameData:FrameData[] = [
     // {x:82,y:90,width:130,height:140},
@@ -77,7 +78,7 @@ async function processGif(gif:Buffer) {
 }
 
 async function loadAllImg() {
-    const imagePath = path.resolve(__dirname, './images')
+    const imagePath = path.resolve(Data.baseData.memeGenDir, 'suck', 'images')
     const images = await tools.imageTools.loadAllImageFPath(imagePath)
     return images
 }
