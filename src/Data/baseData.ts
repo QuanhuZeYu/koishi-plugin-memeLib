@@ -1,9 +1,12 @@
 import type sharp_T from "sharp"
 import type * as cjl from '@cordisjs/logger'
+import path from "path"
+import { MY_PLUGIN_DIR } from "../interface/BASE_DATA"
 
 
 let sharp:typeof sharp_T
 let logger:cjl.LoggerService
+let memeGenDir = path.resolve(MY_PLUGIN_DIR, 'memeGenerator')
 
 function setSharp(module:typeof sharp_T) {
     sharp = module
@@ -22,6 +25,7 @@ function getLogger() {
 }
 
 const baseData = {
+    memeGenDir,
     setSharp,getSharp,
     setLogger,getLogger
 }

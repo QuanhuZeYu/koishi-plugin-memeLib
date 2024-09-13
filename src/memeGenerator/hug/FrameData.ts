@@ -4,6 +4,7 @@ import fs from 'fs/promises'
 import timeIt from "../../tools/decorator/timmer"
 import tools from "../../tools/_index"
 import { Base_GifQuality, MY_PLUGIN_DIR } from "../../interface/BASE_DATA"
+import Data from '../../Data'
 
 const logger = tools.logger
 
@@ -149,7 +150,7 @@ async function processGif(input1:Buffer,input2:Buffer):Promise<Buffer|void> {
 }
 
 export const loadImg = timeIt(async function loadImg() {
-    const imagePath = path.resolve(__dirname, 'images');
+    const imagePath = path.resolve(MY_PLUGIN_DIR, 'hug', 'images');
     const images = await tools.imageTools.loadAllImageFPath(imagePath)
     return images
 })

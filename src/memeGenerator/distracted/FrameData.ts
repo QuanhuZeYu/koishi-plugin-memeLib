@@ -9,8 +9,8 @@ async function distracted(imgBuf:Buffer) {
 
 async function processStatic(imgBuf:Buffer) {
     const sharp = Data.baseData.getSharp()
-    const layer = await tools.imageTools.loadImageFPath(path.resolve(__dirname, './images/1.png'))
-    const label = await tools.imageTools.loadImageFPath(path.resolve(__dirname, './images/0.png'))
+    const layer = await tools.imageTools.loadImageFPath(path.resolve(Data.baseData.memeGenDir, 'distracted', 'images', '1.png'))
+    const label = await tools.imageTools.loadImageFPath(path.resolve(Data.baseData.memeGenDir, 'distracted', 'images', '1.png'))
     imgBuf = await sharp(imgBuf).resize(500,500).toBuffer()
     const join:ComposeJoin[] = [
         {img:imgBuf,frameData:{x:0,y:0,blendOption:"over",opacity:0.5}},

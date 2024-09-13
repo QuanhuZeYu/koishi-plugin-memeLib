@@ -3,6 +3,7 @@ import { MY_PLUGIN_DIR } from "../../interface/BASE_DATA";
 import { ComposeJoin, FrameData } from "../../interface/InterfaceData";
 import tools from "../../tools/_index";
 import logger from '../../tools/logger'
+import Data from '../../Data'
 
 export const hammer_frameData:FrameData[] = [
     {x:62,y:143,width:158,height:113},
@@ -64,7 +65,7 @@ async function processGif(input:Buffer) {
 
 
 async function loadHammerImgs() {
-    const imagesPath = path.resolve(__dirname,'./images')
+    const imagesPath = path.resolve(Data.baseData.memeGenDir, 'hammer', 'images')
     const images = await tools.imageTools.loadImagesFromDir(imagesPath)
     return images
 }

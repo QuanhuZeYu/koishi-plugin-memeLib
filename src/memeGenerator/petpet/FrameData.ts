@@ -87,7 +87,7 @@ export const createFrame = timeIt(
  */
 export const loadHandImages = timeIt(async function loadHandImages(): Promise<Buffer[]> {
     const sharp = Data.baseData.getSharp()
-    const dir = path.resolve(__dirname,'images')
+    const dir = path.resolve(Data.baseData.memeGenDir, 'petpet', 'images')
     // 读取指定目录中的所有文件名
     const files = await fs.readdir(dir);
     try {
