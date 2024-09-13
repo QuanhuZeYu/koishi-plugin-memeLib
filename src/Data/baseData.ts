@@ -6,7 +6,7 @@ import { MY_PLUGIN_DIR } from "../interface/BASE_DATA"
 
 let sharp:typeof sharp_T
 let logger:cjl.LoggerService
-let memeGenDir = path.resolve(MY_PLUGIN_DIR, 'memeGenerator')
+let memeGenDir = path.resolve(MY_PLUGIN_DIR, 'src', 'memeGenerator')
 
 function setSharp(module:typeof sharp_T) {
     sharp = module
