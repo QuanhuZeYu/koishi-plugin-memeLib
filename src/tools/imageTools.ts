@@ -1,25 +1,33 @@
 import { getSharp } from '../Data/context';
-import fs from 'node:fs/promises'
+import fs from 'node:fs'
 import  tools  from './_index';
 import path from 'node:path';
 import logger from './logger';
 import { ComposeJoin } from '../interface/InterfaceData';
 import type { Color, FitEnum } from 'sharp';
 
-
-async function loadAllImageFPath(dirPath: string) {
-    const files = await fs.readdir(dirPath)
-    const pngs:Buffer[] = []
-    await Promise.all(
-        files.map(async (fileName,index) => {
-            if(fileName.endsWith('.png')) {
-                const img = path.resolve(dirPath, fileName);
-                const imgBuffer = await loadImageFPath(img);
-                pngs[index] = imgBuffer;
-            }
+/**
+ * 按顺序读取 dirPath 下的图片
+ * @param dirPath 
+ * @returns 图片的 Buffer 数组
+ */
+async function loadAllImageFPath(dirPath: string): Promise<Buffer[]> {
+    // 读取目录下的所有文件
+    const files = await fs.promises.readdir(dirPath);
+    // 过滤并按顺序排序所有以 .png 结尾的文件
+    const sortedFiles = files
+        .filter(file => file.endsWith('.png'))
+        .sort((a, b) => parseInt(a) - parseInt(b));
+    
+    // 按顺序读取每个文件的内容并返回 Buffer 数组
+    const buffers = await Promise.all(
+        sortedFiles.map(async (file) => {
+            const filePath = path.join(dirPath, file);
+            return fs.promises.readFile(filePath);
         })
-    )
-    return pngs.filter(buffer => buffer !== undefined)
+    );
+
+    return buffers;
 }
 
 /**
@@ -29,7 +37,7 @@ async function loadAllImageFPath(dirPath: string) {
  */
 async function loadImageFPath(absPath: string): Promise<Buffer> {
     try {
-        const imgBuf = await fs.readFile(absPath);
+        const imgBuf = await fs.promises.readFile(absPath);
         return imgBuf;
     } catch (error) {
         logger.error(`读取文件时出错: ${absPath}`, error);
@@ -46,7 +54,7 @@ async function loadImageFPath(absPath: string): Promise<Buffer> {
 async function loadImagesFromDir(dirPath: string): Promise<Buffer[]> {
     try {
         // 读取目录中的所有文件名
-        const files: string[] = await fs.readdir(dirPath);
+        const files: string[] = await fs.promises.readdir(dirPath);
 
         // 过滤出所有 .png 文件
         const pngFiles: string[] = files.filter(file => file.toLowerCase().endsWith('.png'));
@@ -55,7 +63,7 @@ async function loadImagesFromDir(dirPath: string): Promise<Buffer[]> {
         const buffers: Buffer[] = await Promise.all(
             pngFiles.map(async (file) => {
                 const filePath = path.resolve(dirPath, file);
-                return await fs.readFile(filePath);
+                return await fs.promises.readFile(filePath);
             })
         );
 
@@ -80,7 +88,7 @@ async function saveImageFBuffer(imgBuf: Buffer, fileName: string): Promise<void>
     tools.dirTools.ensureDirectoryExists(parentDir)
     try {
         // 将缓冲区数据异步写入文件，减少IO阻塞风险
-        await fs.writeFile(fileName, imgBuf);
+        await fs.promises.writeFile(fileName, imgBuf);
         // 成功保存文件后在控制台打印消息
         logger.info(`文件已成功保存为 ${fileName}`);
     } catch (error) {
