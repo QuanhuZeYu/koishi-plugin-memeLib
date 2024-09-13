@@ -1,4 +1,4 @@
-import { getLogger } from "../../Data/context";
+import Data from "../../Data";
 import logger from "../logger";
 
 

@@ -1,4 +1,4 @@
-import { getSharp } from '../Data/context';
+import Data from '../Data';
 import fs from 'node:fs'
 import  tools  from './_index';
 import path from 'node:path';
@@ -105,7 +105,7 @@ async function saveImageFBuffer(imgBuf: Buffer, fileName: string): Promise<void>
  * @returns 
  */
 async function cropToCircle(imageBuffer:Buffer): Promise<Buffer|undefined>  {
-    const sharp = getSharp()
+    const sharp = Data.baseData.getSharp()
     try {
         // 读取图像
         // const image = sharp(inputPath);
@@ -192,7 +192,7 @@ function isJpg(buffer: Buffer): boolean {
  * @returns 返回一个 Promise，解析为包含对齐后的两张图片的 Buffer
  */
 async function align2imgSize(input: Buffer, input1: Buffer): Promise<[Buffer, Buffer]> {
-    const sharp = getSharp()
+    const sharp = Data.baseData.getSharp()
     // 获取两张图片的尺寸
     const img1Metadata = await sharp(input).metadata();
     const img2Metadata = await sharp(input1).metadata();
@@ -217,7 +217,7 @@ async function align3imgSize(target:Buffer,input1:Buffer,input2:Buffer):Promise<
 
 
 async function alignAtoB(a:Buffer,b:Buffer) {
-    const sharp = getSharp()
+    const sharp = Data.baseData.getSharp()
     // 获取B的尺寸
     const bMetadata = await sharp(b).metadata();
     // B的长宽
@@ -233,7 +233,7 @@ async function alignAtoB(a:Buffer,b:Buffer) {
  * @param join 
  */
 async function compose(join:ComposeJoin[]) {
-    const sharp = getSharp()
+    const sharp = Data.baseData.getSharp()
     // 按顺序将图像叠放 第一张图像大小设置为图像尺寸
     let curImg = join[0].img
     let background:Color = {r:0,g:0,b:0,alpha:0}

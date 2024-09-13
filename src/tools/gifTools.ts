@@ -9,7 +9,7 @@ import { PassThrough, Readable, Stream } from 'node:stream';
 import  concat  from 'concat-stream'
 import Ffmpeg from 'fluent-ffmpeg';
 import { ComposeJoin, createFrameOption, FrameData, GifQuality } from '../interface/InterfaceData';
-import { getSharp } from '../Data/context';
+import Data from '../Data';
 import timeIt from './decorator/timmer';
 
 // import gifFrames from 'gif-frames';
@@ -47,7 +47,7 @@ async function saveGifToFile(gifBuffer: Buffer, outputPath: string): Promise<voi
 }
 
 const extraGIF = timeIt(async function extraGIF(gifbuffer:Buffer):Promise<Buffer[]> {
-    const sharp = getSharp()
+    const sharp = Data.baseData.getSharp()
     const pngs:Buffer[] = []
     await sharp(gifbuffer)
         .metadata()
@@ -292,7 +292,7 @@ async function pngsToGifBuffer_ffmpeg(pngBuffers:Buffer[],fps?:number,quality?:G
 
 
 async function compose(src: Buffer, join: ComposeJoin[]): Promise<Buffer> {
-    const sharp = getSharp()
+    const sharp = Data.baseData.getSharp()
     let curImg = src; // 当前图像
     const background = {background:{r:0,g:0,b:0,alpha:0}}
     // 遍历数组

@@ -1,6 +1,6 @@
 import path from "path"
 import tools from "../../tools/_index"
-import { getSharp } from "../../Data/context"
+import Data from "../../Data"
 import { ComposeJoin } from "../../interface/InterfaceData"
 
 async function distracted(imgBuf:Buffer) {
@@ -8,7 +8,7 @@ async function distracted(imgBuf:Buffer) {
 }
 
 async function processStatic(imgBuf:Buffer) {
-    const sharp = getSharp()
+    const sharp = Data.baseData.getSharp()
     const layer = await tools.imageTools.loadImageFPath(path.resolve(__dirname, './images/1.png'))
     const label = await tools.imageTools.loadImageFPath(path.resolve(__dirname, './images/0.png'))
     imgBuf = await sharp(imgBuf).resize(500,500).toBuffer()

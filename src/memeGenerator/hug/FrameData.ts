@@ -66,10 +66,11 @@ async function processStatic(input1: Buffer, input2: Buffer):Promise<Buffer> {
     for (const [index, src] of srcs.entries()) {
         // 拼接数据
         const join:ComposeJoin[] = [
-            {img:input2, frameData:user[index]},
-            {img:input1, frameData:self[index]},
+            {img:src,frameData:{}},
+            {img:input2, frameData:{...user[index],blendOption:"dest-over"}},
+            {img:input1, frameData:{...self[index],blendOption:"dest-over"}},
         ]
-        const composed = await tools.gifTools.compose(src,join)
+        const composed = await tools.imageTools.compose(join)
         result.push(composed)
     }
     // 将png序列转换成GIF

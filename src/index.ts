@@ -1,6 +1,6 @@
 import { Awaitable, Context, Schema, Service } from 'koishi'
-import { getLogger, setLogger, setSharp } from './Data/context'
-import {} from '@quanhuzeyu/koishi-plugin-qhzy-sharp'
+import Data from './Data/index'
+import type {} from '@quanhuzeyu/koishi-plugin-qhzy-sharp'
 
 import MemeGenerator from './memeGenerator'
 
@@ -32,8 +32,8 @@ export const Config: Schema<Config> = Schema.object({
 })
 
 export function apply(ctx: Context) {
-	setLogger(ctx.logger)
-	setSharp(ctx.QhzySharp.Sharp)
+	Data.baseData.setLogger(ctx.logger)
+	Data.baseData.setSharp(ctx.QhzySharp.Sharp)
 	ctx.plugin(MemeLib)
 }
 
@@ -51,13 +51,12 @@ export class MemeLib extends Service {
 		this.config = {
 			...config
 		}
-		setSharp(ctx.QhzySharp.Sharp)
-		this.memelib = MemeGenerator
-		const logger = getLogger()
-		logger.info('memelib loaded')
+		
 	}
 
 	protected async start() {
-		setLogger(this.ctx.logger(name))
+		this.memelib = MemeGenerator
+		const logger = Data.baseData.getLogger()
+		logger.info('memelib loaded')
 	}
 }

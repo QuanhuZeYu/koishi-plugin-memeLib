@@ -1,6 +1,6 @@
 import path from "node:path";
 import fs from 'fs/promises'; // 使用 Promises API 以便使用 async/await
-import { getSharp } from "../../Data/context";
+import Data from "../../Data";
 
 import { ComposeJoin, FrameData } from "../../interface/InterfaceData";
 import  tools  from "../../tools/_index";
@@ -66,21 +66,6 @@ export const createFrame = timeIt(
         // 确保输入图片透明背景
         const resizedInputImg = await tools.gifTools.compose(hand,join)
         return resizedInputImg
-        // await sharp(input)
-        //     .resize(frameData.width, frameData.height) // 确保背景透明
-        //     .png().toBuffer();
-
-        // // 合成图像
-        // return sharp(hand)
-        //     .composite([
-        //         {
-        //             input: resizedInputImg,
-        //             left: frameData.x,
-        //             top: frameData.y,
-        //             blend: option.blend,
-        //         },
-        //     ])
-        //     .png().toBuffer();
     } catch (err) {
         // 错误处理
         logger.error('创建帧时发生错误:', err);
@@ -101,7 +86,7 @@ export const createFrame = timeIt(
  * @throws 如果任何图像文件无法读取，将抛出错误
  */
 export const loadHandImages = timeIt(async function loadHandImages(): Promise<Buffer[]> {
-    const sharp = getSharp()
+    const sharp = Data.baseData.getSharp()
     const dir = path.resolve(__dirname,'images')
     // 读取指定目录中的所有文件名
     const files = await fs.readdir(dir);
