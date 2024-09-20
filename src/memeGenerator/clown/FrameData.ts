@@ -21,6 +21,7 @@ async function staticProcess(input: Buffer) {
     const { baseData, tools } = memelibData
     const { memeGenDir, getSharp, getLogger } = baseData
     const src = await loadImage()
+    input = await tools.imageTools.cropToCircle(input)
 
     const join: ComposeJoin[] = [
         { img: src, frameData: {} },
@@ -38,7 +39,7 @@ async function gifProcess(input: Buffer) {
 
     const pngs = await tools.gifTools.extraGIF(input)
     for (let i = 0; i < pngs.length; i++) {
-        const frame = pngs[i];
+        const frame = await tools.imageTools.cropToCircle(pngs[i])
         const join: ComposeJoin[] = [
             { img: src, frameData: {} },
             { img: frame, frameData: frameData }
