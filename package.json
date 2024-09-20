@@ -1,7 +1,7 @@
 {
 	"name": "@quanhuzeyu/koishi-plugin-memelib",
 	"description": "memelib插件版",
-	"version": "0.4.5",
+	"version": "0.5.0",
 	"main": "lib/index.js",
 	"typings": "lib/index.d.ts",
 	"private": false,
