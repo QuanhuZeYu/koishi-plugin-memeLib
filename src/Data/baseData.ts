@@ -4,11 +4,12 @@ import path from "path"
 import { MY_PLUGIN_DIR } from "../interface/BASE_DATA"
 
 
-let sharp:typeof sharp_T
-let logger:cjl.LoggerService
-let memeGenDir = path.resolve(MY_PLUGIN_DIR, 'lib', 'memeGenerator')
+let sharp: typeof sharp_T
+let logger: cjl.LoggerService
+/** "~/lib/memeGenerator" */
+let memeGenDir = path.resolve(MY_PLUGIN_DIR, 'lib', 'memeGenerator')  // ~/lib/memeGenerator
 
-function setSharp(module:typeof sharp_T) {
+function setSharp(module: typeof sharp_T) {
     sharp = module
 }
 
@@ -16,7 +17,7 @@ function getSharp() {
     return sharp
 }
 
-function setLogger(logger_in:cjl.LoggerService) {
+function setLogger(logger_in: cjl.LoggerService) {
     logger = logger_in
 }
 
@@ -26,8 +27,8 @@ function getLogger() {
 
 const baseData = {
     memeGenDir,
-    setSharp,getSharp,
-    setLogger,getLogger
+    setSharp, getSharp,
+    setLogger, getLogger
 }
 
 export default baseData
