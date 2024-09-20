@@ -1,44 +1,44 @@
 {
-  "name": "@quanhuzeyu/koishi-plugin-memelib",
-  "description": "memelib插件版",
-  "version": "0.4.5",
-  "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
-  "private": false,
-  "files": [
-    "lib",
-    "dist"
-  ],
-  "license": "MIT",
-  "scripts": {
-    "build": "node build.js",
-    "clean": "node clean.js",
-    "allpub": "npm run build && npm run pubgit && npm run pubnpm",
-    "pubgit": "npm publish --registry=https://npm.pkg.github.com --access=public",
-    "pubnpm": "npm publish --registry=https://registry.npmjs.org --access=public"
-  },
-  "keywords": [
-    "chatbot",
-    "koishi",
-    "plugin"
-  ],
-  "peerDependencies": {
-    "@quanhuzeyu/koishi-plugin-qhzy-sharp": "^1.2.1",
-    "koishi": ">4.17.11"
-  },
-  "dependencies": {
-    "concat-stream": "^2.0.0",
-    "fluent-ffmpeg": "^2.1.3",
-    "gif.js": "^0.2.0",
-    "gifuct-js": "^2.1.2",
-    "js-yaml": "^4.1.0",
-    "pngjs": "^7.0.0"
-  },
-  "devDependencies": {
-    "@quanhuzeyu/koishi-plugin-qhzy-sharp": "^1.2.1",
-    "@types/concat-stream": "^2.0.3",
-    "@types/gif.js": "^0.2.5",
-    "@types/pngjs": "^6.0.5",
-    "sharp": "^0.33.5"
-  }
+	"name": "@quanhuzeyu/koishi-plugin-memelib",
+	"description": "memelib插件版",
+	"version": "0.4.5",
+	"main": "lib/index.js",
+	"typings": "lib/index.d.ts",
+	"private": false,
+	"files": [
+		"lib",
+		"dist"
+	],
+	"license": "MIT",
+	"scripts": {
+		"build": "node build.js",
+		"clean": "node clean.js",
+		"allpub": "npm run build && npm run pubgit && npm run pubnpm",
+		"pubgit": "npm publish --registry=https://npm.pkg.github.com --access=public",
+		"pubnpm": "npm publish --registry=https://registry.npmjs.org --access=public"
+	},
+	"keywords": [
+		"chatbot",
+		"koishi",
+		"plugin"
+	],
+	"peerDependencies": {
+		"@quanhuzeyu/koishi-plugin-qhzy-sharp": "^1.2.1",
+		"koishi": ">4.17.11"
+	},
+	"dependencies": {
+		"concat-stream": "^2.0.0",
+		"fluent-ffmpeg": "^2.1.3",
+		"gif.js": "^0.2.0",
+		"gifuct-js": "^2.1.2",
+		"js-yaml": "^4.1.0",
+		"pngjs": "^7.0.0"
+	},
+	"devDependencies": {
+		"@quanhuzeyu/koishi-plugin-qhzy-sharp": "^1.2.1",
+		"@types/concat-stream": "^2.0.3",
+		"@types/gif.js": "^0.2.5",
+		"@types/pngjs": "^6.0.5",
+		"sharp": "^0.33.5"
+	}
 }

@@ -8,7 +8,7 @@ export const frameData: FrameData = { x: 15, y: 100, width: 441, height: 441, bl
 
 async function clown(input: Buffer) {
     const { baseData, tools } = memelibData
-    const { memeGenDir, getSharp, getLogger } = baseData
+    const { memeGenDir, sharp, logger } = baseData
     const isGif = tools.imageTools.isGif(input)
     if (isGif) {
         return await gifProcess(input)
@@ -19,7 +19,7 @@ async function clown(input: Buffer) {
 
 async function staticProcess(input: Buffer) {
     const { baseData, tools } = memelibData
-    const { memeGenDir, getSharp, getLogger } = baseData
+    const { memeGenDir, sharp, logger } = baseData
     const src = await loadImage()
     input = await tools.imageTools.cropToCircle(input)
 
@@ -34,7 +34,7 @@ async function staticProcess(input: Buffer) {
 async function gifProcess(input: Buffer) {
     const result: Buffer[] = []
     const { baseData, tools } = memelibData
-    const { memeGenDir, getSharp, getLogger } = baseData
+    const { memeGenDir, sharp, logger } = baseData
     const src = await loadImage()
 
     const pngs = await tools.gifTools.extraGIF(input)
@@ -52,7 +52,7 @@ async function gifProcess(input: Buffer) {
 
 async function loadImage() {
     const { baseData, tools } = memelibData
-    const { memeGenDir, getSharp, getLogger } = baseData
+    const { memeGenDir, sharp, logger } = baseData
 
     const imagePath = path.resolve(memeGenDir, 'clown', 'images', '0.png')
     const imageBuffer = await tools.imageTools.loadImageFPath(imagePath)

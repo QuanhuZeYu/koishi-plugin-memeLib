@@ -1,12 +1,13 @@
 import { Awaitable, Context, Schema, Service } from 'koishi'
 import Data from './Data/index'
-import type {} from '@quanhuzeyu/koishi-plugin-qhzy-sharp'
+import type { } from '@quanhuzeyu/koishi-plugin-qhzy-sharp'
+import type CanvasService from "koishi-plugin-puppeteer/src/canvas"
 
 import MemeGenerator from './memeGenerator'
 
 export const name = 'memelib'
 export const filter = false
-export const usage ="\
+export const usage = "\
 # memelib: meme generator\n\
 默认使用sharp作为图片处理库，请先安装qhzy-sharp服务\n\
 该库主要作用是为memes提供实现\n\
@@ -20,10 +21,10 @@ FrameData类型为`{x?: number,y?: number,width?: number,height?: number,rotate?
 "
 
 export const inject = {
-	required: ['QhzySharp']
+	required: ['QhzySharp', 'canvas']
 }
 
-export interface Config { 
+export interface Config {
 	debug?: boolean
 }
 
@@ -32,8 +33,11 @@ export const Config: Schema<Config> = Schema.object({
 })
 
 export function apply(ctx: Context) {
-	Data.baseData.setLogger(ctx.logger)
-	Data.baseData.setSharp(ctx.QhzySharp.Sharp)
+	const { baseData } = Data
+	baseData.config = ctx.config
+	baseData.logger = ctx.logger
+	baseData.sharp = ctx.QhzySharp.Sharp
+	baseData.canvas = ctx.canvas
 	ctx.plugin(MemeLib)
 }
 
@@ -46,17 +50,17 @@ declare module 'koishi' {
 export class MemeLib extends Service {
 	memelib: typeof MemeGenerator
 
-	constructor(ctx: Context, config:Config) {
+	constructor(ctx: Context, config: Config) {
 		super(ctx, 'memelib')
 		this.config = {
 			...config
 		}
-		
+
 	}
 
 	protected async start() {
 		this.memelib = MemeGenerator
-		const logger = Data.baseData.getLogger()
+		const logger = Data.baseData.logger
 		logger.info('memelib loaded')
 	}
 }

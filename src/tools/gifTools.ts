@@ -47,8 +47,9 @@ async function saveGifToFile(gifBuffer: Buffer, outputPath: string): Promise<voi
     }
 }
 
-const extraGIF = timeIt(async function extraGIF(gifbuffer: Buffer): Promise<Buffer[]> {
-    const sharp = Data.baseData.getSharp()
+async function extraGIF(gifbuffer: Buffer): Promise<Buffer[]> {
+    const { baseData, tools } = Data
+    const { memeGenDir, sharp, logger } = baseData
     const pngs: Buffer[] = []
     await sharp(gifbuffer)
         .metadata()
@@ -60,12 +61,12 @@ const extraGIF = timeIt(async function extraGIF(gifbuffer: Buffer): Promise<Buff
                 const frame = await sharp(gifbuffer, { page: i }).png().toBuffer()
                 pngs.push(frame)
             }
-            logger.info(`共提取 ${pngs.length} 帧.`)
+            tools.debug(`共提取 ${pngs.length} 帧.`)
         }).catch((err) => {
-            logger.error('处理 GIF 时发生错误:', err.message)
+            tools.debug('处理 GIF 时发生错误:', err.message)
         })
     return await pngs
-})
+}
 
 
 /**
@@ -292,7 +293,8 @@ async function pngsToGifBuffer_ffmpeg(pngBuffers: Buffer[], fps?: number, qualit
 
 
 async function compose(src: Buffer, join: ComposeJoin[]): Promise<Buffer> {
-    const sharp = Data.baseData.getSharp()
+    const { baseData } = Data
+    const { memeGenDir, sharp, logger } = baseData
     let curImg = src; // 当前图像
     const background = { background: { r: 0, g: 0, b: 0, alpha: 0 } }
     // 遍历数组
@@ -320,12 +322,3 @@ const gifTools = {
 }
 
 export default gifTools
-
-
-// region 私有函数区
-// 判断传入的所有参数是否是Buffer类型
-function allIsBuffer(...args: Buffer[]) {
-    return args.every(arg => arg instanceof Buffer)
-}
-
-const _isBuffer = Buffer.isBuffer

@@ -1,10 +1,12 @@
 import Data from '../Data';
 import fs from 'node:fs'
-import  tools  from './_index';
+import tools from './_index';
 import path from 'node:path';
 import logger from './logger';
 import { ComposeJoin } from '../interface/InterfaceData';
 import type { Color, FitEnum } from 'sharp';
+import type CanvasService from "koishi-plugin-puppeteer/src/canvas"
+import sharp from 'sharp';
 
 /**
  * 按顺序读取 dirPath 下的图片
@@ -18,7 +20,7 @@ async function loadAllImageFPath(dirPath: string): Promise<Buffer[]> {
     const sortedFiles = files
         .filter(file => file.endsWith('.png'))
         .sort((a, b) => parseInt(a) - parseInt(b));
-    
+
     // 按顺序读取每个文件的内容并返回 Buffer 数组
     const buffers = await Promise.all(
         sortedFiles.map(async (file) => {
@@ -68,7 +70,7 @@ async function loadImagesFromDir(dirPath: string): Promise<Buffer[]> {
         );
 
         return buffers;
-    } catch (error:any) {
+    } catch (error: any) {
         throw new Error(`Error reading images from directory: ${dirPath}, Error: ${error.message}`);
     }
 }
@@ -104,40 +106,41 @@ async function saveImageFBuffer(imgBuf: Buffer, fileName: string): Promise<void>
  * @param imageBuffer 
  * @returns 
  */
-async function cropToCircle(imageBuffer:Buffer): Promise<Buffer|undefined>  {
-    const sharp = Data.baseData.getSharp()
+async function cropToCircle(imageBuffer: Buffer): Promise<Buffer | undefined> {
+    const { baseData } = Data
+    const { memeGenDir, sharp, logger } = baseData
     try {
         // 读取图像
         // const image = sharp(inputPath);
         // 使用 Sharp 处理内存中的图像
         const image = sharp(imageBuffer);
-        
+
         // 获取图像元数据
         const metadata = await image.metadata();
         const width = metadata.width;
         const height = metadata.height;
-        
+
         if (!width || !height) {
             throw new Error("无法获取图像尺寸");
         }
-        
+
         // 计算圆形裁剪区域
         const size = Math.min(width, height);
         const circleShape = Buffer.from(
-        `<svg><circle cx="${size/2}" cy="${size/2}" r="${size/2}" fill="white"/></svg>`
+            `<svg><circle cx="${size / 2}" cy="${size / 2}" r="${size / 2}" fill="white"/></svg>`
         );
 
         // 裁剪并保存图像
         const outBuf = await image
-        .resize(size, size, { fit: 'cover', position: 'center' })
-        .composite([{
-            input: circleShape,
-            blend: 'dest-in'
-        }]).png().toBuffer();
+            .resize(size, size, { fit: 'cover', position: 'center' })
+            .composite([{
+                input: circleShape,
+                blend: 'dest-in'
+            }]).png().toBuffer();
         // logger.info("圆形裁剪完成");
         return outBuf
     } catch (error) {
-      logger.error("裁剪过程中发生错误:", error);
+        logger.error("裁剪过程中发生错误:", error);
     }
 }
 
@@ -192,7 +195,8 @@ function isJpg(buffer: Buffer): boolean {
  * @returns 返回一个 Promise，解析为包含对齐后的两张图片的 Buffer
  */
 async function align2imgSize(input: Buffer, input1: Buffer): Promise<[Buffer, Buffer]> {
-    const sharp = Data.baseData.getSharp()
+    const { baseData } = Data
+    const { memeGenDir, sharp, logger } = baseData
     // 获取两张图片的尺寸
     const img1Metadata = await sharp(input).metadata();
     const img2Metadata = await sharp(input1).metadata();
@@ -209,15 +213,16 @@ async function align2imgSize(input: Buffer, input1: Buffer): Promise<[Buffer, Bu
 }
 
 
-async function align3imgSize(target:Buffer,input1:Buffer,input2:Buffer):Promise<[Buffer,Buffer]> {
-    [target,input1] = await align2imgSize(target,input1);
-    [target,input2] = await align2imgSize(target,input2);
-    return [input1,input2]
+async function align3imgSize(target: Buffer, input1: Buffer, input2: Buffer): Promise<[Buffer, Buffer]> {
+    [target, input1] = await align2imgSize(target, input1);
+    [target, input2] = await align2imgSize(target, input2);
+    return [input1, input2]
 }
 
 
-async function alignAtoB(a:Buffer,b:Buffer) {
-    const sharp = Data.baseData.getSharp()
+async function alignAtoB(a: Buffer, b: Buffer) {
+    const { baseData } = Data
+    const { memeGenDir, sharp, logger } = baseData
     // 获取B的尺寸
     const bMetadata = await sharp(b).metadata();
     // B的长宽
@@ -227,33 +232,89 @@ async function alignAtoB(a:Buffer,b:Buffer) {
     return sharp(a).resize(bWidth, bHeight, { fit: 'contain' }).toBuffer();
 }
 
+/**
+ * 透视拉伸
+ * @param input 待处理图像
+ * @param x 角度，整数，45° = 45（可为空）
+ * @param y 角度，整数，45° = 45（可为空）
+ * @returns 
+ */
+async function perspectiveStretching(input: Buffer, canvaData: { x?: number, y?: number, rotate?: number }) {
+    const { baseData, tools } = Data
+    const debug = tools.debug || console.log  // 若未定义 debug，使用 console.log 作为替代
+    let { x, y, rotate } = canvaData
+    // 如果 x 和 y 都为 null 或 undefined，抛出错误
+    if (x == null && y == null) {
+        throw new Error('至少需要提供 x 或 y 的值')
+    }
+    // 如果 x 或 y 为空，给它们赋默认值 0
+    x = x ?? 0
+    y = y ?? 0
+    // Debug 输出传入的角度值
+    debug(`透视拉伸开始: x=${x}, y=${y}`)
+    const meta = await baseData.sharp(input).metadata()
+    const { width, height } = meta
+    // 创建 Canvas
+    const canva = await baseData.canvas.createCanvas(width, height)
+    const ctx = canva.getContext('2d')
+    // 加载图像
+    const image = await baseData.canvas.loadImage(input)
+    // 清除画布
+    ctx.clearRect(0, 0, width, height)
+    // 将坐标系原点设置为图像的中心
+    ctx.translate(width / 2, height / 2)
+    // 将角度转换为弧度，使用标准的角度转弧度公式：角度 * Math.PI / 180
+    const shearY = y * Math.PI / 180  // Y 轴方向倾斜
+    const shearX = x * Math.PI / 180  // X 轴方向倾斜
+    // 合并 X 和 Y 轴的仿射变换
+    ctx.transform(1, Math.tan(shearX), Math.tan(shearY), 1, 0, 0)
+    // 绘制图像，调整位置，使得图像中心对准画布中心
+    ctx.drawImage(image, -image.naturalWidth / 2, -image.naturalHeight / 2)
+    // Debug 输出处理完成
+    debug('透视拉伸完成')
+    // 输出处理后的图像为 buffer
+    const buffer = await canva.toBuffer("image/png")
+    const rot = await sharp(buffer).png().rotate(rotate, { background: { r: 0, g: 0, b: 0, alpha: 0 } }).toBuffer()
+    return rot
+}
+
 
 /**
  * 数组第一个图像作为图像的原始数据，其余图像按照混合参数参与合成
+ * 合成顺序：缩放，平面旋转，透视旋转，叠图选项
  * @param join 
  */
-async function compose(join:ComposeJoin[]) {
-    const sharp = Data.baseData.getSharp()
+async function compose(join: ComposeJoin[]) {
+    const { baseData } = Data
+    const { memeGenDir, sharp, logger } = baseData
     // 按顺序将图像叠放 第一张图像大小设置为图像尺寸
     let curImg = join[0].img
-    let background:Color = {r:0,g:0,b:0,alpha:0}
-    let fit:keyof FitEnum = "contain"
+    let background: Color = { r: 0, g: 0, b: 0, alpha: 0 }
+    let fit: keyof FitEnum = "cover"
     // 将数组第一个元素剔除
     join.shift()
-    for(const frame of join) {
+    for (const frame of join) {
         let img = frame.img
-        fit = frame.frameData.resizeFit ? frame.frameData.resizeFit:fit
-        background = frame.frameData.resizeBackground ? frame.frameData.resizeBackground:background
-        if(frame.frameData.width && frame.frameData.height) {
-            img = await sharp(img).resize(frame.frameData.width,frame.frameData.height,{fit:fit, background:background}).png().toBuffer()
+        fit = frame.frameData.resizeFit ? frame.frameData.resizeFit : fit
+        background = frame.frameData.resizeBackground ? frame.frameData.resizeBackground : background
+        // 缩放宽高
+        if (frame.frameData.width && frame.frameData.height) {
+            img = await sharp(img).resize(frame.frameData.width, frame.frameData.height, { fit: fit, background: background }).png().toBuffer()
+        }
+        // 旋转
+        if (frame.frameData.rotate) {
+            img = await sharp(img).rotate(frame.frameData.rotate, { background: background }).toBuffer()
+        }
+        if (frame.frameData.canvas) {
+            img = await perspectiveStretching(img, frame.frameData.canvas.p_rotate)
         }
         const frameData = frame.frameData
         curImg = await sharp(curImg)
             .composite([{
-                input:img,
-                left:frameData.x||0,
-                top:frameData.y||0,
-                blend:frameData.blendOption||"over",
+                input: img,
+                left: frameData.x || 0,
+                top: frameData.y || 0,
+                blend: frameData.blendOption || "over",
             }])
             .png().toBuffer()
     }
@@ -262,10 +323,11 @@ async function compose(join:ComposeJoin[]) {
 
 
 const imageTools = {
-    cropToCircle, 
-    loadAllImageFPath,loadImageFPath, loadImagesFromDir, saveImageFBuffer,
+    cropToCircle,
+    loadAllImageFPath, loadImageFPath, loadImagesFromDir, saveImageFBuffer,
     isPng, isGif, isJpg,
-    align2imgSize,align3imgSize,alignAtoB,
+    align2imgSize, align3imgSize, alignAtoB,
+    perspectiveStretching,
     compose
 }
 

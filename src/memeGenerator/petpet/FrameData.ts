@@ -3,10 +3,8 @@ import fs from 'fs/promises'; // 使用 Promises API 以便使用 async/await
 import Data from "../../Data";
 
 import { ComposeJoin, FrameData } from "../../interface/InterfaceData";
-import  tools  from "../../tools/_index";
+import tools from "../../tools/_index";
 import { createFrameOption } from "../../interface/InterfaceData";
-
-const logger = tools.logger
 
 const petFps = 15;
 const frameTime = 15 / 1000;
@@ -41,7 +39,8 @@ export const frames: FrameData[] = [
  * @throws 如果任何图像文件无法读取，将抛出错误
  */
 export const loadHandImages = timeIt(async function loadHandImages(): Promise<Buffer[]> {
-    const sharp = Data.baseData.getSharp()
+    const { baseData } = Data
+    const { memeGenDir, sharp, logger } = baseData
     const dir = path.resolve(Data.baseData.memeGenDir, 'petpet', 'images')
     // 读取指定目录中的所有文件名
     const files = await fs.readdir(dir);
@@ -78,27 +77,27 @@ export const loadHandImages = timeIt(async function loadHandImages(): Promise<Bu
  * 此函数负责生成一个动图GIF它首先加载手部图像，然后为每一帧创建相应的缓冲区图像，
  * 最后将所有帧合并生成GIF图像如果在生成过程中发生错误，会抛出异常并打印错误信息
  */
-const craftPetpetGif =  timeIt(
+const craftPetpetGif = timeIt(
     async function genPetpetGif(inputImg: Buffer): Promise<Buffer | void> {
-    const isGif = await tools.imageTools.isGif(inputImg)
-    if(!isGif) {
-        return await processStaticImage(inputImg)
-    } else if(isGif) {
-        return await processGifImage(inputImg)
-    }
-})
+        const isGif = await tools.imageTools.isGif(inputImg)
+        if (!isGif) {
+            return await processStaticImage(inputImg)
+        } else if (isGif) {
+            return await processGifImage(inputImg)
+        }
+    })
 
 // 处理静态图像
 const processStaticImage = timeIt(async function processStaticImage(inputImg: Buffer): Promise<Buffer> {
-    const result:Buffer[] = []  // 结果缓冲区
+    const result: Buffer[] = []  // 结果缓冲区
     // 读取手部图
     const hands = await loadHandImages()
-    for(let i=0;i<hands.length;i++) {
+    for (let i = 0; i < hands.length; i++) {
         const src = hands[i]
         const frame = frames[i]
-        const join:ComposeJoin[] = [
-            {img:src,frameData:{}},
-            {img:inputImg,frameData:{...frame,blendOption:"dest-over"}}
+        const join: ComposeJoin[] = [
+            { img: src, frameData: {} },
+            { img: inputImg, frameData: { ...frame, blendOption: "dest-over" } }
         ]
         const result_ = await tools.imageTools.compose(join)
         result.push(result_)
@@ -109,16 +108,16 @@ const processStaticImage = timeIt(async function processStaticImage(inputImg: Bu
 
 // 处理 GIF 图像
 const processGifImage = timeIt(async function processGifImage(inputImg: Buffer): Promise<Buffer> {
-    const result:Buffer[] = []
+    const result: Buffer[] = []
     const hands = await loadHandImages()
     const [hands1, input2] = await tools.gifTools.align2Gif(hands, inputImg)
-    for(let i=0;i<hands1.length;i++) {
+    for (let i = 0; i < hands1.length; i++) {
         const src = hands1[i]
-        const index = i%frames.length
+        const index = i % frames.length
         const frame = frames[index]
-        const join:ComposeJoin[] = [
-            {img:src, frameData:{}},
-            {img:input2[i],frameData:{...frame,blendOption:"dest-over"}}
+        const join: ComposeJoin[] = [
+            { img: src, frameData: {} },
+            { img: input2[i], frameData: { ...frame, blendOption: "dest-over" } }
         ]
         const result_ = await tools.imageTools.compose(join)
         result.push(result_)

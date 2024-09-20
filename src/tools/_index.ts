@@ -4,14 +4,15 @@ import dirTools from './dirTools'
 import timeer from './decorator/timmer'
 import logger from "./logger";
 import bufferTools from "./bufferTools";
+import debug from "./debug";
 
-const decorator = {timeer}
+const decorator = { timeer }
 
 // 圆形裁切工具集
 const tools = {
-    imageTools,gifTools,dirTools,
-    decorator,bufferTools,
-    logger
+    imageTools, gifTools, dirTools,
+    decorator, bufferTools,
+    debug
 }
 
 export default tools
