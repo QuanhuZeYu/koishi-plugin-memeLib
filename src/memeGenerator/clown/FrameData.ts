@@ -47,7 +47,7 @@ async function gifProcess(input: Buffer) {
         const resultFrame = await tools.imageTools.compose(join)
         result.push(resultFrame)
     }
-    return result
+    return await tools.gifTools.pngsToGifBuffer_ffmpeg(result)
 }
 
 async function loadImage() {

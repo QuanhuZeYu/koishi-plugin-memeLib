@@ -3,14 +3,15 @@ import path from "node:path";
 import * as gifuct from 'gifuct-js'
 import { PNG } from 'pngjs';
 import gifJs from 'gif.js'
-import  logger  from "../tools/logger";
+import logger from "../tools/logger";
 import { BASE_DATA, Base_GifQuality } from '../interface/BASE_DATA';
 import { PassThrough, Readable, Stream } from 'node:stream';
-import  concat  from 'concat-stream'
+import concat from 'concat-stream'
 import Ffmpeg from 'fluent-ffmpeg';
 import { ComposeJoin, createFrameOption, FrameData, GifQuality } from '../interface/InterfaceData';
 import Data from '../Data';
 import timeIt from './decorator/timmer';
+import tools from './_index';
 
 // import gifFrames from 'gif-frames';
 
@@ -46,21 +47,21 @@ async function saveGifToFile(gifBuffer: Buffer, outputPath: string): Promise<voi
     }
 }
 
-const extraGIF = timeIt(async function extraGIF(gifbuffer:Buffer):Promise<Buffer[]> {
+const extraGIF = timeIt(async function extraGIF(gifbuffer: Buffer): Promise<Buffer[]> {
     const sharp = Data.baseData.getSharp()
-    const pngs:Buffer[] = []
+    const pngs: Buffer[] = []
     await sharp(gifbuffer)
         .metadata()
         .then(async (metadata) => {
             if (!metadata.pages || metadata.pages === 0) {
                 throw new Error('GIF数据中无帧数据');
             }
-            for(let i = 0; i < metadata.pages; i++) {
-                const frame = await sharp(gifbuffer, {page: i}).png().toBuffer()
+            for (let i = 0; i < metadata.pages; i++) {
+                const frame = await sharp(gifbuffer, { page: i }).png().toBuffer()
                 pngs.push(frame)
             }
             logger.info(`共提取 ${pngs.length} 帧.`)
-        }).catch((err)=> {
+        }).catch((err) => {
             logger.error('处理 GIF 时发生错误:', err.message)
         })
     return await pngs
@@ -154,98 +155,97 @@ async function align3Gif(
     target1: Buffer | Buffer[],
     target2: Buffer | Buffer[],
     input: Buffer
-  ): Promise<[Buffer[], Buffer[], Buffer[], number]> {
+): Promise<[Buffer[], Buffer[], Buffer[], number]> {
     // 处理 target1 和 target2 的两种输入情况（Buffer 或 Buffer 数组）
     let targets1: Buffer[] = Array.isArray(target1) ? target1 : await extraGIF(target1);
     let targets2: Buffer[] = Array.isArray(target2) ? target2 : await extraGIF(target2);
-  
+
     // 提取输入 GIF 的 png 序列
     let inputs: Buffer[] = await extraGIF(input);
-  
+
     const target1FramesCount = targets1.length;
     const target2FramesCount = targets2.length;
     const inputFramesCount = inputs.length;
-  
+
     // 如果所有输入的帧数已经一致，直接返回
     if (inputFramesCount === target1FramesCount && inputFramesCount === target2FramesCount) {
-      return [targets1, targets2, inputs, 1];
+        return [targets1, targets2, inputs, 1];
     }
-  
+
     // 如果目标帧数较小，需要倍化目标帧
     let rt: number = 1; // 倍数，默认是1，只有有目标帧数较小时，才需要倍化
     let alignedTargets1: Buffer[] = [];
     let alignedTargets2: Buffer[] = [];
-  
+
     // 确定最大的帧数
     const maxFramesCount = Math.max(target1FramesCount, target2FramesCount, inputFramesCount);
-  
+
     // 处理 target1 的帧数
     if (target1FramesCount < maxFramesCount) {
-      rt = Math.ceil(maxFramesCount / target1FramesCount);
-      for (let i = 0; i < rt; i++) {
-        alignedTargets1 = alignedTargets1.concat(targets1);
-      }
-      alignedTargets1 = alignedTargets1.slice(0, maxFramesCount); // 修正长度以匹配最大帧数
-      targets1 = alignedTargets1;
+        rt = Math.ceil(maxFramesCount / target1FramesCount);
+        for (let i = 0; i < rt; i++) {
+            alignedTargets1 = alignedTargets1.concat(targets1);
+        }
+        alignedTargets1 = alignedTargets1.slice(0, maxFramesCount); // 修正长度以匹配最大帧数
+        targets1 = alignedTargets1;
     }
-  
+
     // 处理 target2 的帧数
     if (target2FramesCount < maxFramesCount) {
-      rt = Math.ceil(maxFramesCount / target2FramesCount);
-      for (let i = 0; i < rt; i++) {
-        alignedTargets2 = alignedTargets2.concat(targets2);
-      }
-      alignedTargets2 = alignedTargets2.slice(0, maxFramesCount); // 修正长度以匹配最大帧数
-      targets2 = alignedTargets2;
+        rt = Math.ceil(maxFramesCount / target2FramesCount);
+        for (let i = 0; i < rt; i++) {
+            alignedTargets2 = alignedTargets2.concat(targets2);
+        }
+        alignedTargets2 = alignedTargets2.slice(0, maxFramesCount); // 修正长度以匹配最大帧数
+        targets2 = alignedTargets2;
     }
-  
+
     // 处理 input 的帧数
     let alignedInputs: Buffer[] = [];
     if (inputFramesCount > maxFramesCount) {
-      // 保留头和尾的帧
-      alignedInputs.push(inputs[0]); // 添加第一个帧
-      alignedInputs.push(inputs[inputs.length - 1]); // 添加最后一个帧
-  
-      // 计算需要抽取的帧数量
-      let framesToRemove = inputFramesCount - maxFramesCount;
-      let left = 1; // 从第二帧开始（已经保留了第一帧）
-      let right = inputs.length - 2; // 到倒数第二帧结束（已经保留了最后一帧）
-  
-      // 使用二分法来抽取中间的帧
-      while (framesToRemove > 0 && left <= right) {
-        const middle = Math.floor((left + right) / 2);
-        if (!alignedInputs.includes(inputs[middle])) {
-          alignedInputs.push(inputs[middle]);
-          framesToRemove--;
+        // 保留头和尾的帧
+        alignedInputs.push(inputs[0]); // 添加第一个帧
+        alignedInputs.push(inputs[inputs.length - 1]); // 添加最后一个帧
+
+        // 计算需要抽取的帧数量
+        let framesToRemove = inputFramesCount - maxFramesCount;
+        let left = 1; // 从第二帧开始（已经保留了第一帧）
+        let right = inputs.length - 2; // 到倒数第二帧结束（已经保留了最后一帧）
+
+        // 使用二分法来抽取中间的帧
+        while (framesToRemove > 0 && left <= right) {
+            const middle = Math.floor((left + right) / 2);
+            if (!alignedInputs.includes(inputs[middle])) {
+                alignedInputs.push(inputs[middle]);
+                framesToRemove--;
+            }
+
+            if (framesToRemove > 0) {
+                if (alignedInputs.length % 2 === 0) {
+                    right--; // 从右侧移除
+                } else {
+                    left++; // 从左侧移除
+                }
+            }
         }
-  
-        if (framesToRemove > 0) {
-          if (alignedInputs.length % 2 === 0) {
-            right--; // 从右侧移除
-          } else {
-            left++; // 从左侧移除
-          }
-        }
-      }
-  
-      // 按原顺序排序抽取的帧
-      alignedInputs.sort((a, b) => inputs.indexOf(a) - inputs.indexOf(b));
-      inputs = alignedInputs;
+
+        // 按原顺序排序抽取的帧
+        alignedInputs.sort((a, b) => inputs.indexOf(a) - inputs.indexOf(b));
+        inputs = alignedInputs;
     } else {
-      // DO NOTHING
+        // DO NOTHING
     }
-  
+
     // 最终保证所有 GIF 帧数一致
     return [targets1, targets2, inputs, rt];
 }
 
 
-async function pngsToGifBuffer_ffmpeg(pngBuffers:Buffer[],fps?:number,quality?:GifQuality):Promise<Buffer> {
+async function pngsToGifBuffer_ffmpeg(pngBuffers: Buffer[], fps?: number, quality?: GifQuality): Promise<Buffer> {
     const petFps = fps || BASE_DATA.baseFps;
     const max_colors = quality?.color || Base_GifQuality.medium.color
     const bay = quality?.bayer_scale || Base_GifQuality.medium.bayer_scale
-    
-    
+
     const command = Ffmpeg();
     // 创建 PassThrough 流用于 Buffer 数据传递
     const readable = new Readable({
@@ -259,7 +259,7 @@ async function pngsToGifBuffer_ffmpeg(pngBuffers:Buffer[],fps?:number,quality?:G
     // 创建 PassThrough 流用于 Buffer 数据输出
     const passThrough = new Stream.PassThrough();
     const data: Uint8Array[] = [];
-    
+
     return new Promise((resolve, reject) => {
         passThrough.on('data', (chunk) => {
             data.push(chunk);
@@ -280,7 +280,7 @@ async function pngsToGifBuffer_ffmpeg(pngBuffers:Buffer[],fps?:number,quality?:G
             .addInput(readable)
             .inputFPS(petFps)
             .addOptions([
-                `-filter_complex`, 
+                `-filter_complex`,
                 // `[0:v] fps=${petFps},scale=320:-1:flags=lanczos [scaled]; [scaled] palettegen [palette]; [0:v][palette] paletteuse`
                 `[0:v] fps=${petFps},scale=320:-1:flags=lanczos [scaled]; [scaled] palettegen=max_colors=${max_colors} [palette]; [0:v][palette] paletteuse=dither=bayer:bayer_scale=${bay}:diff_mode=rectangle`
             ])
@@ -294,19 +294,19 @@ async function pngsToGifBuffer_ffmpeg(pngBuffers:Buffer[],fps?:number,quality?:G
 async function compose(src: Buffer, join: ComposeJoin[]): Promise<Buffer> {
     const sharp = Data.baseData.getSharp()
     let curImg = src; // 当前图像
-    const background = {background:{r:0,g:0,b:0,alpha:0}}
+    const background = { background: { r: 0, g: 0, b: 0, alpha: 0 } }
     // 遍历数组
-    for (const [index,obj] of join.entries()) {
+    for (const [index, obj] of join.entries()) {
         // 每个数组下的对象处理
         let img = obj.img
         const frame = obj.frameData
-        img = await sharp(img).resize(frame.width,frame.height,background).rotate(frame.rotate||0,background).png().toBuffer()
+        img = await sharp(img).resize(frame.width, frame.height, background).rotate(frame.rotate || 0, background).png().toBuffer()
         curImg = await sharp(curImg)
             .composite([{
-                input:img,
-                left:frame.x,
-                top:frame.y,
-                blend:frame.blendOption as any||"dest-over"
+                input: img,
+                left: frame.x,
+                top: frame.y,
+                blend: frame.blendOption as any || "dest-over"
             }])
             .png().toBuffer()
     }
@@ -314,9 +314,9 @@ async function compose(src: Buffer, join: ComposeJoin[]): Promise<Buffer> {
 }
 
 
-const gifTools = { 
-    saveGifToFile,extraGIF,align2Gif,align3Gif,
-    pngsToGifBuffer_ffmpeg,compose
+const gifTools = {
+    saveGifToFile, extraGIF, align2Gif, align3Gif,
+    pngsToGifBuffer_ffmpeg, compose
 }
 
 export default gifTools
@@ -324,7 +324,7 @@ export default gifTools
 
 // region 私有函数区
 // 判断传入的所有参数是否是Buffer类型
-function allIsBuffer(...args:Buffer[]) {
+function allIsBuffer(...args: Buffer[]) {
     return args.every(arg => arg instanceof Buffer)
 }
 
