@@ -6,7 +6,6 @@ import logger from './logger';
 import type { } from "@quanhuzeyu/koishi-plugin-canvas"
 import { ComposeJoin } from '../interface/InterfaceData';
 import type { Color, FitEnum } from 'sharp';
-import sharp from 'sharp';
 
 /**
  * 按顺序读取 dirPath 下的图片
@@ -241,6 +240,7 @@ async function alignAtoB(a: Buffer, b: Buffer) {
  */
 async function perspectiveStretching(input: Buffer, canvaData: { x?: number, y?: number, rotate?: number }) {
     const { baseData, tools } = Data
+    const { sharp, logger, canvas } = baseData
     const debug = tools.debug || console.log  // 若未定义 debug，使用 console.log 作为替代
     let { x, y, rotate } = canvaData
     // 如果 x 和 y 都为 null 或 undefined，抛出错误
