@@ -37,7 +37,7 @@ export function apply(ctx: Context) {
 	baseData.config = ctx.config
 	baseData.logger = ctx.logger
 	baseData.sharp = ctx.QhzySharp.Sharp
-	baseData.canvas = ctx.canvas
+	baseData.canvas = ctx.QhzyCanvas
 	if (baseData.canvas) { Data.tools.debug('canvas loaded') } else { Data.tools.debug('canvas not loaded') }
 	ctx.plugin(MemeLib)
 }

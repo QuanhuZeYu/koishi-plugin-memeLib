@@ -1,5 +1,5 @@
 import type sharp_T from "sharp"
-import type { Canvas as Canvas_S } from "@quanhuzeyu/koishi-plugin-canvas"
+import type { QhzyCanvas as Canvas_S } from "@quanhuzeyu/koishi-plugin-canvas"
 import type Canvas from "canvas"
 import type * as cjl from '@cordisjs/logger'
 import path from "path"
