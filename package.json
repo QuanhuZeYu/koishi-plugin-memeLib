@@ -1,7 +1,7 @@
 {
 	"name": "@quanhuzeyu/koishi-plugin-memelib",
 	"description": "memelib插件版",
-	"version": "0.5.5",
+	"version": "0.5.7",
 	"main": "lib/index.js",
 	"typings": "lib/index.d.ts",
 	"private": false,
@@ -41,6 +41,16 @@
 		"@types/gif.js": "^0.2.5",
 		"@types/pngjs": "^6.0.5",
 		"sharp": "^0.33.5",
+		"@img/sharp-libvips-dev": "^1.0.4",
+		"@img/sharp-wasm32": "^0.33.5",
+		"color": "^4.2.3",
+		"detect-libc": "^2.0.3",
+		"semver": "^7.6.3",
+		"color-convert": "^2.0.1",
+		"color-string": "^1.9.1",
+		"color-name": "^2.0.0",
+		"simple-swizzle": "^0.2.2",
+		"is-arrayish": "^0.3.2",
 		"canvas": "^2.11.2"
 	}
 }
