@@ -23,6 +23,7 @@
 		"plugin"
 	],
 	"peerDependencies": {
+		"koishi-plugin-puppeteer": "^3.9.0",
 		"@quanhuzeyu/koishi-plugin-qhzy-sharp": "^1.2.1",
 		"koishi": ">4.17.11"
 	},
