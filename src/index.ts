@@ -21,7 +21,7 @@ FrameData类型为`{x?: number,y?: number,width?: number,height?: number,rotate?
 "
 
 export const inject = {
-	required: ['QhzySharp', 'canvas']
+	required: ['QhzySharp', 'QhzyCanvas']
 }
 
 export interface Config {
