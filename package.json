@@ -1,7 +1,7 @@
 {
 	"name": "@quanhuzeyu/koishi-plugin-memelib",
 	"description": "memelib插件版",
-	"version": "0.5.2",
+	"version": "0.5.3",
 	"main": "lib/index.js",
 	"typings": "lib/index.d.ts",
 	"private": false,
@@ -23,7 +23,7 @@
 		"plugin"
 	],
 	"peerDependencies": {
-		"@quanhuzeyu/koishi-plugin-canvas": ">=0.0.1",
+		"@quanhuzeyu/koishi-plugin-canvas": ">=0.0.3",
 		"@quanhuzeyu/koishi-plugin-qhzy-sharp": "^1.2.1",
 		"koishi": ">4.17.11"
 	},
