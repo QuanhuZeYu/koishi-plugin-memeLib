@@ -11,7 +11,7 @@ async function clownFlip(input: Buffer) {
     const { logger, sharp, memeGenDir } = baseData
 
     if (tools.imageTools.isGif(input)) {
-
+        return await gifProcess(input)
     } else if (tools.imageTools.isPng(input) || tools.imageTools.isJpg(input)) {
         return await staticProccess(input)
     }
@@ -30,6 +30,26 @@ async function staticProccess(input: Buffer) {
     ]
     const result = await tools.imageTools.compose(join)
     return result
+}
+
+async function gifProcess(input: Buffer) {
+    const result = []
+    const { baseData, tools } = Data
+    const { logger, sharp, memeGenDir } = baseData
+
+    const { clown, hand } = await loadImage()
+    const pngs = await tools.gifTools.extraGIF(input)
+    for (let i = 0; i < pngs.length; i++) {
+        const img = await tools.imageTools.cropToCircle(pngs[i])
+        const join: ComposeJoin[] = [
+            { img: clown, frameData: {} },
+            { img: img, frameData: { ...frameData } },
+            { img: hand, frameData: {} }
+        ]
+        result.push(await tools.imageTools.compose(join))
+    }
+    const gif = await tools.gifTools.pngsToGifBuffer_ffmpeg(result)
+    return gif
 }
 
 async function loadImage() {

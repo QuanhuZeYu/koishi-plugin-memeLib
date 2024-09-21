@@ -1,7 +1,7 @@
 import { Awaitable, Context, Schema, Service } from 'koishi'
 import Data from './Data/index'
 import type { } from '@quanhuzeyu/koishi-plugin-qhzy-sharp'
-import type CanvasService from "koishi-plugin-puppeteer/src/canvas"
+import type { } from "@quanhuzeyu/koishi-plugin-canvas"
 
 import MemeGenerator from './memeGenerator'
 
@@ -38,6 +38,7 @@ export function apply(ctx: Context) {
 	baseData.logger = ctx.logger
 	baseData.sharp = ctx.QhzySharp.Sharp
 	baseData.canvas = ctx.canvas
+	if (baseData.canvas) { Data.tools.debug('canvas loaded') } else { Data.tools.debug('canvas not loaded') }
 	ctx.plugin(MemeLib)
 }
 

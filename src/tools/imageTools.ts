@@ -3,9 +3,9 @@ import fs from 'node:fs'
 import tools from './_index';
 import path from 'node:path';
 import logger from './logger';
+import type { } from "@quanhuzeyu/koishi-plugin-canvas"
 import { ComposeJoin } from '../interface/InterfaceData';
 import type { Color, FitEnum } from 'sharp';
-import type CanvasService from "koishi-plugin-puppeteer/src/canvas"
 import sharp from 'sharp';
 
 /**
